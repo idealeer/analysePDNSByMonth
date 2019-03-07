@@ -201,6 +201,25 @@ func anlyseDNSTimesV6V4Geo() {
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.JsonV6DNSTimes))
 	}
+	if variables.DNSDateBefore != constants.DateExample {
+		unonDNSTimesV6V4Geo()
+	}
+}
+
+/*
+	合并DNS请求次数
+ */
+func unonDNSTimesV6V4Geo() {
+	if variables.JsonV6DNSTimes == "" {
+		variables.JsonV6DNSTimes = GetResFileName(constants.JsonV6DNSTimes + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	if variables.JsonV6DNSTimesBefore == "" {
+		variables.JsonV6DNSTimesBefore = GetBeforeResFileName(constants.JsonV6DNSTimes + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	if variables.JsonV6DNSTimesTotal == "" {
+		variables.JsonV6DNSTimesTotal = GetResFileName(constants.JsonV6DNSTimes + "-By" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	unionJsonResult(variables.JsonV6DNSTimesBefore, variables.JsonV6DNSTimes, variables.JsonV6DNSTimesTotal)
 }
 
 /*
@@ -227,6 +246,25 @@ func anlyseDomainV6V4Geo() {
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.JsonV6DomainAlive))
 	}
+	if variables.DNSDateBefore != constants.DateExample {
+		unonDomainV6V4Geo()
+	}
+}
+
+/*
+	合并活跃域名
+ */
+func unonDomainV6V4Geo() {
+	if variables.JsonV6DomainAlive == "" {
+		variables.JsonV6DomainAlive = GetResFileName(constants.JsonV6DomainAlive + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	if variables.JsonV6DomainAliveBefore == "" {
+		variables.JsonV6DomainAliveBefore = GetBeforeResFileName(constants.JsonV6DomainAlive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	if variables.JsonV6DomainAliveTotal == "" {
+		variables.JsonV6DomainAliveTotal = GetResFileName(constants.JsonV6DomainAlive + "-By" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	unionJsonResult(variables.JsonV6DomainAliveBefore, variables.JsonV6DomainAlive, variables.JsonV6DomainAliveTotal)
 }
 
 /*
@@ -253,6 +291,25 @@ func anlyseIPv6V6V4Geo() {
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.JsonV6IPv6Alive))
 	}
+	if variables.DNSDateBefore != constants.DateExample {
+		unonIPv6V6V4Geo()
+	}
+}
+
+/*
+	合并活跃IPv6
+ */
+func unonIPv6V6V4Geo() {
+	if variables.JsonV6IPv6Alive == "" {
+		variables.JsonV6IPv6Alive = GetResFileName(constants.JsonV6IPv6Alive + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	if variables.JsonV6IPv6AliveBefore == "" {
+		variables.JsonV6IPv6AliveBefore = GetBeforeResFileName(constants.JsonV6IPv6Alive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	if variables.JsonV6IPv6AliveTotal == "" {
+		variables.JsonV6IPv6AliveTotal = GetResFileName(constants.JsonV6IPv6Alive + "-By" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	unionJsonResult(variables.JsonV6IPv6AliveBefore, variables.JsonV6IPv6Alive, variables.JsonV6IPv6AliveTotal)
 }
 
 /*
@@ -279,7 +336,27 @@ func anlyseSLDV6V4Geo() {
 		analyseAliveSLDByGeo(variables.DNSFileV6GeoUniqSLD, variables.DNSFileV4GeoUniqSLD, variables.JsonV6SLDAlive)
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.JsonV6SLDAlive))
-	}}
+	}
+	if variables.DNSDateBefore != constants.DateExample {
+		unonSLDV6V4Geo()
+	}
+}
+
+/*
+	合并活跃SLD
+ */
+func unonSLDV6V4Geo() {
+	if variables.JsonV6SLDAlive == "" {
+		variables.JsonV6SLDAlive = GetResFileName(constants.JsonV6SLDAlive + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	if variables.JsonV6SLDAliveBefore == "" {
+		variables.JsonV6SLDAliveBefore = GetBeforeResFileName(constants.JsonV6SLDAlive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	if variables.JsonV6SLDAliveTotal == "" {
+		variables.JsonV6SLDAliveTotal = GetResFileName(constants.JsonV6SLDAlive + "-By" + variables.DNSDateSpec, constants.JsonExtion)
+	}
+	unionJsonResult(variables.JsonV6SLDAliveBefore, variables.JsonV6SLDAlive, variables.JsonV6SLDAliveTotal)
+}
 
 /*
 	分析SLD请求次数

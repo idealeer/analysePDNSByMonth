@@ -29,8 +29,8 @@ const DNSFileUniqTLD 			string = "uniqTLD" 								// 去重TLD文件
 const DNSFileV6GeoV4GeoName		string = "GeoPDNS"      						// V6地理+V4地理文件
 const DNSFileGeoUniqDomain 		string = "GeoUniqDomain" 						// 地理去重域名文件
 const DNSFileGeoUniqIPv6 		string = "GeoUniqIPv6"     						// 地理去重IPv6地址文件
-const DNSFileV6GeoUniqSLD 		string = "V6GeoUniqSLD"            				// 地理去重SLD文件
-const DNSFileV4GeoUniqSLD 		string = "V4GeoUniqSLD"            				// 地理去重SLD文件
+const DNSFileV6GeoUniqSLD 		string = "GeoV6UniqSLD"            				// 地理去重SLD文件
+const DNSFileV4GeoUniqSLD 		string = "GeoV4UniqSLD"            				// 地理去重SLD文件
 //
 
 //// 记录文件各字段位置

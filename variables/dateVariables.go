@@ -8,4 +8,5 @@
 
 package variables
 
-var DNSDateSpec string // 指定日期月份
+var DNSDateSpec 	string // 指定日期月份
+var DNSDateBefore	string // 先前日期

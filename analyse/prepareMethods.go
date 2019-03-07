@@ -58,6 +58,23 @@ func PrepareFileDir(fileDir string) {
 }
 
 /*
+	先前结果文件准备
+ */
+func PrepareBeforeResFile(fileDir string) {
+	fg, err := os.Stat(fileDir)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-beforeRes-dir parm]", err.Error()))
+		os.Exit(1)
+	}
+	if fg.IsDir() {		// 目录
+		variables.ResBeforeDir = util.NormalFileDir(fileDir)
+	} else {			// 文件
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-beforeRes-dir parm]", err.Error()))
+		os.Exit(1)
+	}
+}
+
+/*
 	日志准备
  */
 func PrepareLog(logShow bool, logFile bool, logShowLev int8) {
@@ -111,11 +128,17 @@ func PrepareMaxMind(fileName string) {
 /*
 	日期月份准备
  */
-func PrepareDate(date string) {
+func PrepareDate(date string, dateBefore string) {
 	if util.MatchRegexp(constants.DateRegexp, date) {
 		variables.DNSDateSpec = date
 	} else{
 		util.LogRecord(fmt.Sprintf("Error: Please add the correct [-date parm], like %s", constants.DateExample))
+		os.Exit(1)
+	}
+	if util.MatchRegexp(constants.DateRegexp, dateBefore) {
+		variables.DNSDateBefore = dateBefore
+	} else{
+		util.LogRecord(fmt.Sprintf("Error: Please add the correct [-date-before parm], like %s", constants.DateExample))
 		os.Exit(1)
 	}
 }

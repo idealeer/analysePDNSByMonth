@@ -14,6 +14,7 @@ import (
 	"analysePDNSByMonth/util"
 	"analysePDNSByMonth/variables"
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -120,4 +121,93 @@ func unionDNSRecordAndIP(dnsFileName string, ipFileName string, unionFileName st
 
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	util.LogRecord("Ending: " + dnsFileName + " & " + ipFileName + " -> " + unionFileName)
+}
+
+/*
+	合并Json文件
+ */
+func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " + fileBefore + " & " + fileNow + " -> " + fileTotal)
+
+	// 结果Map
+	var beforeMap = make(types.TPMSTPMSTPMSI64)
+	var nowMap = make(types.TPMSTPMSTPMSI64)
+	//var totalMap = make(types.TPMSTPMSTPMSI64)		// beforeMap -> totalMap
+
+
+	// 读入先前Json结果，构建字典
+	beforeFile, eO := os.Open(fileBefore)
+	if eO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eO.Error()))
+		os.Exit(1)
+	}
+	defer beforeFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+	inBeforeFile := bufio.NewReader(beforeFile)
+	beforeJsonBytes, _, eR := inBeforeFile.ReadLine()
+	if eR == io.EOF {
+		util.LogRecord(fmt.Sprintf("Error: %s is null", fileBefore))
+		os.Exit(1)
+	}
+	eU := json.Unmarshal(beforeJsonBytes, &beforeMap)
+	if eU != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s : %s", fileBefore, eU.Error()))
+		os.Exit(1)
+	}
+
+	// 读入当前Json结果，构建字典
+	nowFile, eO0 := os.Open(fileNow)
+	if eO0 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eO0.Error()))
+		os.Exit(1)
+	}
+	defer nowFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+	inNowFile := bufio.NewReader(nowFile)
+	nowJsonBytes, _, eR0 := inNowFile.ReadLine()
+	if eR0 == io.EOF {
+		util.LogRecord(fmt.Sprintf("Error: %s is null", fileNow))
+		os.Exit(1)
+	}
+	eU0 := json.Unmarshal(nowJsonBytes, &nowMap)
+	if eU0 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s : %s", fileNow, eU0.Error()))
+		os.Exit(1)
+	}
+
+	// 合并结果
+	for geo, _ := range nowMap {
+		for country, mcMap := range nowMap[geo] {
+			if beforeMap[geo][country] == nil {
+				tempMap := make(types.TPMSI64)
+				beforeMap[geo][country] = tempMap
+			}
+			for m, c := range mcMap {
+				beforeMap[geo][country][m] += c
+			}
+		}
+	}
+
+	// 保存结果到JSon
+	jsonBytes, err := json.Marshal(beforeMap)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+		os.Exit(1)
+	}
+
+	fw, err := os.OpenFile(fileTotal, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fw.Close()
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+		os.Exit(1)
+	}
+	outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
+	_, err = outWFile.WriteString(string(jsonBytes) + "\n")
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+		os.Exit(1)
+	}
+	outWFile.Flush()
+
+	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
+	util.LogRecord("Ending: " + fileBefore + " & " + fileNow + " -> " + fileTotal)
 }

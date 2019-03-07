@@ -12,6 +12,7 @@ package variables
 var DNSFileDir					string				// dns文件文件夹
 var DNSFileName					string				// 单个dns文件名
 var ZDNSExeFileName				string				// ZDNS可执行文件
+var ResBeforeDir				string				// 先前结果文件夹
 //
 
 //// 合并文件
@@ -58,6 +59,20 @@ var JsonV6DomainAlive 			string 				// "IPv6 域名活跃趋势"
 var JsonV6IPv6Alive 			string   			// "IPv6 IPv6活跃趋势"
 var JsonV6SLDAlive 				string    			// "IPv6 SLD活跃趋势"
 var JsonV6SLDTimes				string				// "IPv6 SLD请求次数"
+//
+
+// V6+V4地理先前分析结果文件
+var JsonV6DNSTimesBefore 		string    			// "IPv6 DNS请求趋势"
+var JsonV6DomainAliveBefore 	string 				// "IPv6 域名活跃趋势"
+var JsonV6IPv6AliveBefore 		string   			// "IPv6 IPv6活跃趋势"
+var JsonV6SLDAliveBefore 		string    			// "IPv6 SLD活跃趋势"
+//
+
+// V6+V4地理分析结果总文件
+var JsonV6DNSTimesTotal 		string    			// "IPv6 DNS请求趋势"
+var JsonV6DomainAliveTotal 		string 				// "IPv6 域名活跃趋势"
+var JsonV6IPv6AliveTotal 		string   			// "IPv6 IPv6活跃趋势"
+var JsonV6SLDAliveTotal 		string    			// "IPv6 SLD活跃趋势"
 //
 
 // 数据显示条数

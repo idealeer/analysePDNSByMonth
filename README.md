@@ -12,8 +12,12 @@ Requirement:
 	-source-dir sourceDir
 
 Options:
+  -beforeRes-dir string
+    	已有结果目录(待合并结果文件)
   -date string
     	指定日期月份 (default "197006")
+  -date-before string
+    	先前日期月份 (default "197006")
   -desty-dir string
     	合并文件目录
   -domain-file string
@@ -75,6 +79,6 @@ Options:
     	zdns可执行文件路径
 
 Example:
-	analysePDNSByMonth -source-dir dnsFile -excute 0 -mmdb mmdb -function 0		分析V6地理的全部数据
+	analysePDNSByMonth -source-dir source-dir -mmdb -zdns zdns -beforeRes-dir before-dir -date 201902 -date-before 201901 -excute 0 -function 0	分析V46地理的全部数据
 ```
 

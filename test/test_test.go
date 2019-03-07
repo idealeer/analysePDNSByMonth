@@ -10,8 +10,12 @@ package test
 
 import (
 	"analysePDNSByMonth/analyse"
+	"analysePDNSByMonth/constants"
+	"analysePDNSByMonth/types"
 	"analysePDNSByMonth/util"
+	"analysePDNSByMonth/variables"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/miekg/dns"
@@ -30,6 +34,68 @@ import (
  */
 func TestMain(m *testing.M) {
 	os.Exit(m.Run())
+}
+
+func TestUnionRes(t *testing.T) {
+	var res0Map = make(types.TPMSTPMSTPMSI64)
+	var resMap = make(types.TPMSTPMSTPMSI64)
+	variables.DNSDateSpec = "201902"
+	variables.DNSDateBefore = "201901"
+
+	res := `{"v4地理":{"中国大陆":{"201902":103818,"总计":103818},"中国香港":{"201902":12,"总计":12},"俄罗斯":{"201902":10,"总计":10},"奥地利":{"201902":11,"总计":11},"德国":{"201902":1,"总计":1},"新加坡":{"201902":1,"总计":1},"美国":{"201902":107,"总计":107},"英国":{"201902":1,"总计":1},"荷兰":{"201902":10,"总计":10},"越南":{"201902":8,"总计":8}},"v6地理":{"中国大陆":{"201902":1,"总计":1},"中国香港":{"201902":12,"总计":12},"俄罗斯":{"201902":10,"总计":10},"印度尼西亚":{"201902":8,"总计":8},"德国":{"201902":1,"总计":1},"新加坡":{"201902":578,"总计":578},"澳大利亚":{"201902":15,"总计":15},"瑞士":{"201902":11,"总计":11},"美国":{"201902":103341,"总计":103341},"英国":{"201902":5,"总计":5},"荷兰":{"201902":6,"总计":6}}}`
+	err := json.Unmarshal([]byte(res), &resMap)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println(resMap)
+	}
+
+	res0 := `{"v4地理":{"中国大陆":{"201901":103818,"总计":103818},"中国香港":{"201901":12,"总计":12},"俄罗斯":{"201901":10,"总计":10},"奥地利":{"201901":11,"总计":11},"德国":{"201901":1,"总计":1},"新加坡":{"201901":1,"总计":1},"美国":{"201901":107,"总计":107},"英国":{"201901":1,"总计":1},"荷兰":{"201901":10,"总计":10},"越南":{"201901":8,"总计":8}},"v6地理":{"中国大陆":{"201901":1,"总计":1},"中国香港":{"201901":12,"总计":12},"俄罗斯":{"201901":10,"总计":10},"印度尼西亚":{"201901":8,"总计":8},"德国":{"201901":1,"总计":1},"新加坡":{"201901":578,"总计":578},"澳大利亚":{"201901":15,"总计":15},"瑞士":{"201901":11,"总计":11},"美国":{"201901":103341,"总计":103341},"英国":{"201901":5,"总计":5},"荷兰":{"201901":6,"总计":6}}}`
+	err0 := json.Unmarshal([]byte(res0), &res0Map)
+	if err != nil {
+		fmt.Println(err0.Error())
+	} else {
+		fmt.Println(resMap)
+	}
+
+	// 增加v46各自独有的国家
+	for country, _ := range resMap[constants.V4GeoString] {
+		if resMap[constants.V6GeoString][country] == nil {
+			tempMap := make(types.TPMSI64)
+			resMap[constants.V6GeoString][country] = tempMap
+			resMap[constants.V6GeoString][country][variables.DNSDateSpec] = 0
+			resMap[constants.V6GeoString][country][constants.TotalTimesString] = 0
+		}
+	}
+	for country, _ := range resMap[constants.V6GeoString] {
+		if resMap[constants.V4GeoString][country] == nil {
+			tempMap := make(types.TPMSI64)
+			resMap[constants.V4GeoString][country] = tempMap
+			resMap[constants.V4GeoString][country][variables.DNSDateSpec] = 0
+			resMap[constants.V4GeoString][country][constants.TotalTimesString] = 0
+		}
+	}
+
+	for country, _ := range res0Map[constants.V4GeoString] {
+		if res0Map[constants.V6GeoString][country] == nil {
+			tempMap := make(types.TPMSI64)
+			res0Map[constants.V6GeoString][country] = tempMap
+			res0Map[constants.V6GeoString][country][variables.DNSDateSpec] = 0
+			res0Map[constants.V6GeoString][country][constants.TotalTimesString] = 0
+		}
+	}
+	for country, _ := range res0Map[constants.V6GeoString] {
+		if res0Map[constants.V4GeoString][country] == nil {
+			tempMap := make(types.TPMSI64)
+			res0Map[constants.V4GeoString][country] = tempMap
+			res0Map[constants.V4GeoString][country][variables.DNSDateSpec] = 0
+			res0Map[constants.V4GeoString][country][constants.TotalTimesString] = 0
+		}
+	}
+
+	fmt.Println(resMap)
+	fmt.Println(res0Map)
+
 }
 
 func TestHello(t *testing.T) {
