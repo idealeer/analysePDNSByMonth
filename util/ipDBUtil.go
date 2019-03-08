@@ -43,7 +43,7 @@ func GetIPGeoByMM(ips string, mmdb *geoip2.Reader, v4Flag bool, v6Flag bool) str
 		}
 	}
 	//return strings.Join(geoList, ";")
-	return geoList[constants.MMCNNameIndex]
+	return geoList[constants.MMCodeIndex]
 }
 
 /*

@@ -16,3 +16,9 @@ const DateFormer		string = "1970-01-01 00:00:00"		// 较早的日期
 const DateRegexp  		string = `[\d]{4}((0[1-9])|1[0-2])`	// 月份日期指定正则表达式
 const DateExample		string = "197006"					// 月份日期示例
 
+const YearBeforeStart	int = 2015
+const MonthBeforeStart	int = 7
+const YearBeforeEnd		int = 2018
+const MonthBeforeEnd	int = 8
+
+const ApiCountStartIndex	int = 18						// 每个国家的月份数据开始位置

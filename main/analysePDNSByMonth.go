@@ -38,6 +38,7 @@ var (
 	testFile   		string 	// 测试文件
 	topN	   		int    	// topN显示
 	beforeResDir	string	// 已有结果文件夹
+	apiResDir		string	// 历史结果-API类型文件夹
 )
 
 func init() {
@@ -48,6 +49,7 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CmdUnionFile, "合并指定目录下的文件")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdNS, "查询IPv4地址")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdTest, "测试")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdApi2Json, "API结果转Json")+
 			fmt.Sprintf("%d\t%s", constants.CmdDefault, "什么也没做(默认)"))
 
 	// 二级命令
@@ -69,7 +71,7 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaDNSTimesByGeo, "统计PDNS数据:分析DNS请求次数\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaDomainByGeo, "统计PDNS数据:分析活跃域名\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaIPv6ByGeo, "统计PDNS数据:分析活跃IPv6\t(须指定:-excute [0])")+
-			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaSLDByGeo, "统计PDNS数据:分析活跃SLD\t\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaSLDByGeo, "统计PDNS数据:分析活跃SLD\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaSLDTimesByGeo, "统计PDNS数据:分析SLD请求次数\t(须指定:-excute [0])")+
 
 			fmt.Sprintf("%d\t%s", constants.CCmdDefault, "什么也没做(默认)"))
@@ -132,6 +134,9 @@ func init() {
 	flag.StringVar(&beforeResDir, "beforeRes-dir", "",
 		fmt.Sprintf("%s", "已有结果目录(待合并结果文件)"))
 
+	flag.StringVar(&apiResDir, "apiRes-dir", "",
+		fmt.Sprintf("%s", "历史结果API类型文件夹"))
+
 	flag.Usage = usage // 改变默认的usage
 }
 
@@ -169,6 +174,11 @@ func main() {
 	case constants.CmdTest:
 		analyse.PrepareMaxMind(mmdb)
 		analyse.GetGeoPercentByFile(testFile)
+	case constants.CmdApi2Json:
+		analyse.PrepareAPIResFile(apiResDir)
+		analyse.PrepareDate(date, dateBefore)
+		analyse.ApiRes2JsonRes()
+
 	default:
 		util.LogRecord("什么也没做\tPlease add the correct [-excute parm]")
 		usage()

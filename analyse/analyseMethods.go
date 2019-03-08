@@ -203,6 +203,8 @@ func anlyseDNSTimesV6V4Geo() {
 	}
 	if variables.DNSDateBefore != constants.DateExample {
 		unonDNSTimesV6V4Geo()
+	} else {
+		util.LogRecord(fmt.Sprintf("no union beforeRes, only %s", variables.JsonV6DNSTimes))
 	}
 }
 
@@ -248,6 +250,8 @@ func anlyseDomainV6V4Geo() {
 	}
 	if variables.DNSDateBefore != constants.DateExample {
 		unonDomainV6V4Geo()
+	} else {
+		util.LogRecord(fmt.Sprintf("no union beforeRes, only %s", variables.JsonV6DomainAlive))
 	}
 }
 
@@ -293,6 +297,8 @@ func anlyseIPv6V6V4Geo() {
 	}
 	if variables.DNSDateBefore != constants.DateExample {
 		unonIPv6V6V4Geo()
+	} else {
+		util.LogRecord(fmt.Sprintf("no union beforeRes, only %s", variables.JsonV6IPv6Alive))
 	}
 }
 
@@ -339,6 +345,8 @@ func anlyseSLDV6V4Geo() {
 	}
 	if variables.DNSDateBefore != constants.DateExample {
 		unonSLDV6V4Geo()
+	} else {
+		util.LogRecord(fmt.Sprintf("no union beforeRes, only %s", variables.JsonV6SLDAlive))
 	}
 }
 
@@ -490,3 +498,65 @@ func UnionFiles(fileDir string) {
 func GetGeoPercentByFile(fileName string) {
 	getGeoPercentByFile(fileName)
 }
+
+//// api类型结果转json
+func ApiRes2JsonRes() {
+	apiDNSTimes2Json()
+	apiDomain2Json()
+	apiIPv62Json()
+	apiSLD2Json()
+}
+
+/*
+	DNS请求的历史api结果转json
+ */
+func apiDNSTimes2Json() {
+	if variables.JsonV6DNSTimesApi == "" {
+		variables.JsonV6DNSTimesApi = GetApiResFileName(constants.JsonV6DNSTimes + "-API", constants.ApiExtion)
+	}
+	if variables.JsonV6DNSTimesBefore == "" {
+		variables.JsonV6DNSTimesBefore = GetResFileName(constants.JsonV6DNSTimes + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	util.Api2JsonMap(variables.JsonV6DNSTimesApi, variables.JsonV6DNSTimesBefore)
+}
+
+/*
+	域名活跃趋势历史api结果转json
+ */
+func apiDomain2Json() {
+	if variables.JsonV6DomainAliveApi == "" {
+		variables.JsonV6DomainAliveApi = GetApiResFileName(constants.JsonV6DomainAlive + "-API", constants.ApiExtion)
+	}
+	if variables.JsonV6DomainAliveBefore == "" {
+		variables.JsonV6DomainAliveBefore = GetResFileName(constants.JsonV6DomainAlive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	util.Api2JsonMap(variables.JsonV6DomainAliveApi, variables.JsonV6DomainAliveBefore)
+}
+
+/*
+	IPv6活跃趋势历史api结果转json
+ */
+func apiIPv62Json() {
+	if variables.JsonV6IPv6AliveApi == "" {
+		variables.JsonV6IPv6AliveApi = GetApiResFileName(constants.JsonV6IPv6Alive + "-API", constants.ApiExtion)
+	}
+	if variables.JsonV6IPv6AliveBefore == "" {
+		variables.JsonV6IPv6AliveBefore = GetResFileName(constants.JsonV6IPv6Alive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	util.Api2JsonMap(variables.JsonV6IPv6AliveApi, variables.JsonV6IPv6AliveBefore)
+}
+
+/*
+	SLD活跃趋势历史api结果转json
+ */
+func apiSLD2Json() {
+	if variables.JsonV6SLDAliveApi == "" {
+		variables.JsonV6SLDAliveApi = GetApiResFileName(constants.JsonV6SLDAlive + "-API", constants.ApiExtion)
+	}
+	if variables.JsonV6SLDAliveBefore == "" {
+		variables.JsonV6SLDAliveBefore = GetResFileName(constants.JsonV6SLDAlive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
+	}
+	util.Api2JsonMap(variables.JsonV6SLDAliveApi, variables.JsonV6SLDAliveBefore)
+}
+
+//

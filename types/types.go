@@ -44,3 +44,15 @@ func (p SCList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p SCList) Len() int           { return len(p) }
 func (p SCList) Less(i, j int) bool { return p[i].Count < p[j].Count }
 
+type CMC struct {
+	Country string  `json:"area,omitempty"`
+	Counts  []int64 `json:"seens,omitempty"`
+	Total   int64	`json:"total,omitempty"`
+	rank	int32	`json:"rank,omitempty"`
+}
+
+type CMCList struct {
+	Code	int32							`json:"code,omitempty"`
+	Success	bool							`json:"success,omitempty"`
+	Data	[]CMC							`json:"data,omitempty"`
+}

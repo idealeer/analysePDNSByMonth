@@ -144,12 +144,14 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 	}
 	defer beforeFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
 	inBeforeFile := bufio.NewReader(beforeFile)
-	beforeJsonBytes, _, eR := inBeforeFile.ReadLine()
-	if eR == io.EOF {
+
+	beforeJsonString, eR := inBeforeFile.ReadString('\n')
+	if eR == io.EOF || eR != nil{
 		util.LogRecord(fmt.Sprintf("Error: %s is null", fileBefore))
 		os.Exit(1)
 	}
-	eU := json.Unmarshal(beforeJsonBytes, &beforeMap)
+
+	eU := json.Unmarshal([]byte(beforeJsonString), &beforeMap)
 	if eU != nil {
 		util.LogRecord(fmt.Sprintf("Error: %s : %s", fileBefore, eU.Error()))
 		os.Exit(1)
@@ -163,12 +165,13 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 	}
 	defer nowFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
 	inNowFile := bufio.NewReader(nowFile)
-	nowJsonBytes, _, eR0 := inNowFile.ReadLine()
-	if eR0 == io.EOF {
+	nowJsonString, eR0 := inNowFile.ReadString('\n')
+
+	if eR0 == io.EOF || eR0 != nil {
 		util.LogRecord(fmt.Sprintf("Error: %s is null", fileNow))
 		os.Exit(1)
 	}
-	eU0 := json.Unmarshal(nowJsonBytes, &nowMap)
+	eU0 := json.Unmarshal([]byte(nowJsonString), &nowMap)
 	if eU0 != nil {
 		util.LogRecord(fmt.Sprintf("Error: %s : %s", fileNow, eU0.Error()))
 		os.Exit(1)
@@ -177,12 +180,83 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 	// 合并结果
 	for geo, _ := range nowMap {
 		for country, mcMap := range nowMap[geo] {
+			// 先前结果不存在，则为新国家添加所有月份记录
 			if beforeMap[geo][country] == nil {
-				tempMap := make(types.TPMSI64)
-				beforeMap[geo][country] = tempMap
+				if beforeMap[constants.V4GeoString][country] == nil {
+					tempMap := make(types.TPMSI64)
+					beforeMap[constants.V4GeoString][country] = tempMap
+				}
+				if beforeMap[constants.V6GeoString][country] == nil {
+					tempMap1 := make(types.TPMSI64)
+					beforeMap[constants.V6GeoString][country] = tempMap1
+				}
+				// 遍历任一个国家获得月份
+				for c, _ := range beforeMap[geo] {
+					if c == country {
+						continue
+					}
+					for m, _ := range beforeMap[geo][c] {
+						beforeMap[constants.V4GeoString][country][m] += 0
+						beforeMap[constants.V6GeoString][country][m] += 0
+					}
+					break
+				}
 			}
 			for m, c := range mcMap {
 				beforeMap[geo][country][m] += c
+			}
+		}
+	}
+
+	countryLenst := ""
+	geoLenst := ""
+	lenst := 0
+
+	// 增加v46添加各自独有的国家
+	for country, mcMap := range beforeMap[constants.V4GeoString] {
+		len := len(mcMap)
+		if len > lenst {
+			lenst = len
+			geoLenst = constants.V4GeoString
+			countryLenst =country
+		}
+		if beforeMap[constants.V6GeoString][country] == nil {
+			tempMap := make(types.TPMSI64)
+			beforeMap[constants.V6GeoString][country] = tempMap
+			// 遍历任一个国家获得月份
+			for c, _ := range beforeMap[constants.V4GeoString] {
+				for m, _ := range beforeMap[constants.V4GeoString][c] {
+					beforeMap[constants.V6GeoString][country][m] = 0
+				}
+				break
+			}
+		}
+	}
+	for country, mcMap := range beforeMap[constants.V6GeoString] {
+		len := len(mcMap)
+		if len > lenst {
+			lenst = len
+			geoLenst = constants.V6GeoString
+			countryLenst =country
+		}
+		if beforeMap[constants.V4GeoString][country] == nil {
+			tempMap := make(types.TPMSI64)
+			beforeMap[constants.V4GeoString][country] = tempMap
+			// 遍历任一个国家获得月份
+			for c, _ := range beforeMap[constants.V6GeoString] {
+				for m, _ := range beforeMap[constants.V6GeoString][c] {
+					beforeMap[constants.V4GeoString][country][m] = 0
+				}
+				break
+			}
+		}
+	}
+
+	// 为每个国家填充不存在的月份
+	for geo, _ := range beforeMap {
+		for country, _ := range beforeMap[geo] {
+			for m, _ := range beforeMap[geoLenst][countryLenst] {
+				beforeMap[geo][country][m] += 0
 			}
 		}
 	}
@@ -207,7 +281,7 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 		os.Exit(1)
 	}
 	outWFile.Flush()
-
+	
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	util.LogRecord("Ending: " + fileBefore + " & " + fileNow + " -> " + fileTotal)
 }

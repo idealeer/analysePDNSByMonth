@@ -43,6 +43,13 @@ func GetBeforeResFileName(fileName string, fileExtion string) string {
 }
 
 /*
+	获得API结果文件夹中的完整文件名
+ */
+func GetApiResFileName(fileName string, fileExtion string) string {
+	return fmt.Sprintf("%s%s.%s", variables.ApiResDir, fileName, fileExtion)
+}
+
+/*
 	判断是否是DNS文件夹
  */
 func IsTheDNSFolder(fi os.FileInfo) bool {

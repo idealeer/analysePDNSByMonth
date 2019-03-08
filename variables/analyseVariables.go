@@ -13,6 +13,7 @@ var DNSFileDir					string				// dns文件文件夹
 var DNSFileName					string				// 单个dns文件名
 var ZDNSExeFileName				string				// ZDNS可执行文件
 var ResBeforeDir				string				// 先前结果文件夹
+var ApiResDir					string				// 历史api结果文件
 //
 
 //// 合并文件
@@ -73,6 +74,13 @@ var JsonV6DNSTimesTotal 		string    			// "IPv6 DNS请求趋势"
 var JsonV6DomainAliveTotal 		string 				// "IPv6 域名活跃趋势"
 var JsonV6IPv6AliveTotal 		string   			// "IPv6 IPv6活跃趋势"
 var JsonV6SLDAliveTotal 		string    			// "IPv6 SLD活跃趋势"
+//
+
+// V6+V4地理分析结果api文件
+var JsonV6DNSTimesApi 			string    			// "IPv6 DNS请求趋势"
+var JsonV6DomainAliveApi 		string 				// "IPv6 域名活跃趋势"
+var JsonV6IPv6AliveApi 			string   			// "IPv6 IPv6活跃趋势"
+var JsonV6SLDAliveApi 			string    			// "IPv6 SLD活跃趋势"
 //
 
 // 数据显示条数

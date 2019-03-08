@@ -142,9 +142,9 @@ const UnionFileExtion			string = "uf"									// 合并文件扩展名
 //
 
 //// 字符串
-const TotalTimesString 			string = "总计" 									// 统计"总数" 名
-const V4GeoString 				string = "v4地理"                 				// v4地理
-const V6GeoString 				string = "v6地理"                 				// v6地理
+const TotalTimesString 			string = "total" 								// 统计"总数" 名
+const V4GeoString 				string = "v4Geo"                 				// v4地理
+const V6GeoString 				string = "v6Geo"                 				// v6地理
 
 // 分析结果文件后缀
 const JsonExtion  				string = "json"
@@ -160,6 +160,9 @@ const JsonV6SLDAlive 			string = "IPv6-SLD活跃趋势"   					// "IPv6 SLD活�
 const JsonV6SLDTimes			string = "IPv6-SLD请求次数"						// "IPv6 SLD请求次数"
 //
 
+// 历史API文件后缀
+const ApiExtion					string = "txt"
+
 //// 命令参数
 /// 一级命令
 const (
@@ -169,6 +172,8 @@ const (
 	CmdNS																		// 域名解析
 
 	CmdTest
+	CmdApi2Json																	// api结果转json
+
 	CmdDefault
 )
 //

@@ -24,32 +24,32 @@ func TS2YearAndMonth(ts int64) (year int, month int) {
 }
 
 /*
-	获得指定年月间的年月表，通过指定年月区间
+	获得指定年月间的年月表，通过指定年月区间，包括截止月
  */
 func GetSpecYMsByYM(sy int, sm int, ey int, em int) ([]string, int) {
 	ymNum := (ey - sy) * 12 - sm + em + 1	// 总月份个数
 	var yms = make([]string, 0)
 	if sy == ey {							// 同一年
 		for m := sm; m <= em; m++ {
-			ym := fmt.Sprintf("%04d-%02d", sy, m)
+			ym := fmt.Sprintf("%04d%02d", sy, m)
 			yms = append(yms, ym)
 		}
 	} else {								// 不同年
 		// 起始年
 		for m := sm; m <= 12; m++ {
-			ym := fmt.Sprintf("%04d-%02d", sy, m)
+			ym := fmt.Sprintf("%04d%02d", sy, m)
 			yms = append(yms, ym)
 		}
 		// 中间年
 		for y := sy + 1; y < ey; y++ {
 			for m := 1; m <= 12; m++ {
-				ym := fmt.Sprintf("%04d-%02d", y, m)
+				ym := fmt.Sprintf("%04d%02d", y, m)
 				yms = append(yms, ym)
 			}
 		}
 		// 截止年
 		for m := 1; m <= em; m++ {
-			ym := fmt.Sprintf("%04d-%02d", ey, m)
+			ym := fmt.Sprintf("%04d%02d", ey, m)
 			yms = append(yms, ym)
 		}
 	}
@@ -57,7 +57,7 @@ func GetSpecYMsByYM(sy int, sm int, ey int, em int) ([]string, int) {
 }
 
 /*
-	获得指定年月间的年月表，通过指定时间戳中的年月区间
+	获得指定年月间的年月表，通过指定时间戳中的年月区间，包括截止月
  */
 func GetSpecYMsByTS(tsStart int64, tsEnd int64) ([]string, int) {
 	sy, sm := TS2YearAndMonth(tsStart)		// 起始年月
@@ -66,25 +66,25 @@ func GetSpecYMsByTS(tsStart int64, tsEnd int64) ([]string, int) {
 	var yms = make([]string, 0)
 	if sy == ey {							// 同一年
 		for m := sm; m <= em; m++ {
-			ym := fmt.Sprintf("%04d-%02d", sy, m)
+			ym := fmt.Sprintf("%04d%02d", sy, m)
 			yms = append(yms, ym)
 		}
 	} else {								// 不同年
 		// 起始年
 		for m := sm; m <= 12; m++ {
-			ym := fmt.Sprintf("%04d-%02d", sy, m)
+			ym := fmt.Sprintf("%04d%02d", sy, m)
 			yms = append(yms, ym)
 		}
 		// 中间年
 		for y := sy + 1; y < ey; y++ {
 			for m := 1; m <= 12; m++ {
-				ym := fmt.Sprintf("%04d-%02d", y, m)
+				ym := fmt.Sprintf("%04d%02d", y, m)
 				yms = append(yms, ym)
 			}
 		}
 		// 截止年
 		for m := 1; m <= em; m++ {
-			ym := fmt.Sprintf("%04d-%02d", ey, m)
+			ym := fmt.Sprintf("%04d%02d", ey, m)
 			yms = append(yms, ym)
 		}
 	}
