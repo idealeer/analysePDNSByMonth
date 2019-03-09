@@ -281,7 +281,7 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 		os.Exit(1)
 	}
 	outWFile.Flush()
-	
+
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	util.LogRecord("Ending: " + fileBefore + " & " + fileNow + " -> " + fileTotal)
 }

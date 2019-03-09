@@ -53,7 +53,7 @@ func GetApiResFileName(fileName string, fileExtion string) string {
 	判断是否是DNS文件夹
  */
 func IsTheDNSFolder(fi os.FileInfo) bool {
-	return fi.IsDir() && util.MatchRegexp(constants.DNSFolerReg, fi.Name())
+	return fi.IsDir() && util.MatchRegexp(constants.DNSFolerReg, fi.Name()) && strings.HasPrefix(fi.Name(), variables.DNSDateSpec)
 }
 
 /*
@@ -100,6 +100,7 @@ func unionDNSFile(fileName string, outWFile *bufio.Writer) {
 		dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
 		dnsRecordIPv6 := util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
 		dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordCount, dnsRecordDomain, dnsRecordIPv6)
+
 		_, err = outWFile.WriteString(dnsRecordNew + "\n")
 		if err != nil {
 			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))

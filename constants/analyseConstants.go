@@ -34,13 +34,13 @@ const DNSFileV4GeoUniqSLD 		string = "GeoV4UniqSLD"            				// 地理去�
 //
 
 //// 记录文件各字段位置
-const RecordStartIndex			int8 = 3										// 字段起始位置
-const DataIndex					int = 1											// 每个字段数据的有效位置
+const RecordStartIndex			int8 = 0										// 字段起始位置
+const DataIndex					int = 0											// 每个字段数据的有效位置
 const DomainIndex				int = 0											// 域名的有效位置
 // 原始记录文件
 const (
-	OCountIndex					int8 = iota	+ RecordStartIndex					// 请求次数位置
-	ODomainIndex																// 域名位置
+	ODomainIndex					int8 = iota	+ RecordStartIndex				// 域名位置
+	OCountIndex																	// 次数位置
 	OIPv6Index																	// IPv6位置
 )
 //
