@@ -145,6 +145,7 @@ func main() {
 	flag.Parse()
 
 	// 初始化
+	analyse.PrepareDate(date, dateBefore)
 	analyse.PrepareFileDir(sourceDir)
 	analyse.PrepareLog(logShow, logFile, int8(logLevel))
 
@@ -157,7 +158,6 @@ func main() {
 
 	switch cmd {
 	case constants.CmdAnalyse:
-		analyse.PrepareDate(date, dateBefore)
 		analyse.PrepareBeforeResFile(beforeResDir)
 		analyse.PrepareMaxMind(mmdb)
 		analyse.PrepareZDNS(zdns, threads)
@@ -176,7 +176,7 @@ func main() {
 		analyse.GetGeoPercentByFile(testFile)
 	case constants.CmdApi2Json:
 		analyse.PrepareAPIResFile(apiResDir)
-		analyse.PrepareDate(date, dateBefore)
+		//analyse.PrepareDate(date, dateBefore)
 		analyse.ApiRes2JsonRes()
 
 	default:
@@ -184,11 +184,11 @@ func main() {
 		usage()
 	}
 
-	analyse.EndMaxMind()
-	analyse.EndLog()
-
 	util.LogRecord(fmt.Sprintf("cost: %s", util.CostTime(timeNow)))
 	util.LogRecord("Task completed!!!\n\n\n\n\n")
+
+	analyse.EndMaxMind()
+	analyse.EndLog()
 }
 
 func usage() {

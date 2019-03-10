@@ -8,8 +8,6 @@
 
 package constants
 
-import "os"
-
 //// 合并文件
 const DNSFileUnionName			string = "pdnsUnion"							// 合并后的dns文件名
 //
@@ -39,7 +37,7 @@ const DataIndex					int = 0											// 每个字段数据的有效位置
 const DomainIndex				int = 0											// 域名的有效位置
 // 原始记录文件
 const (
-	ODomainIndex					int8 = iota	+ RecordStartIndex				// 域名位置
+	ODomainIndex				int8 = iota	+ RecordStartIndex					// 域名位置
 	OCountIndex																	// 次数位置
 	OIPv6Index																	// IPv6位置
 )
@@ -47,8 +45,8 @@ const (
 
 // 合并后文件
 const (
-	UNCountIndex				int8 = iota										// 请求次数位置
-	UNDomainIndex																// 域名位置
+	UNDomainIndex				int8 = iota										// 域名位置
+	UNCountIndex																// 次数位置
 	UNIPv6Index																	// IPv6位置
 )
 //
@@ -68,8 +66,8 @@ const (
 
 // 合并V4地址文件
 const (
-	DV4CountIndex				int8 = iota										// 请求次数位置
-	DV4DomainIndex																// 域名位置
+	DV4DomainIndex				int8 = iota										// 域名位置
+	DV4CountIndex																// 次数位置
 	DV4IPv6Index																// IPv6位置
 	DV4IPv4Index																// IPv4位置
 )
@@ -77,8 +75,8 @@ const (
 
 // 合并V6地理+V4地理文件
 const (
-	GeoCountIndex  				int8 = iota 									// 请求次数位置
-	GeoDomainIndex             													// 域名位置
+	GeoDomainIndex  				int8 = iota 								// 域名位置
+	GeoCountIndex             													// 次数位置
 	GeoIPv6Index              													// IPv6位置
 	GeoIPv4Index               													// IPv4位置
 	GeoV6GIndex                													// V6地理位置
@@ -120,11 +118,11 @@ const (
 
 //// 临时文件
 const DNSFileTempExtion			string = "pdns"									// dns分析文件临时扩展名
-const DNSTempFolder				string = "temp" + string(os.PathSeparator)		// dns临时文件夹
+const DNSTempFolder				string = "temp"									// dns临时文件夹
 //
 
 //// 结果文件
-const DNSResFolder				string = "result" + string(os.PathSeparator)	// dns结果文件夹
+const DNSResFolder				string = "result"								// dns结果文件夹
 
 // 域名IP结果文件
 const DomainIpDetlName			string = "DomainIPDetail"						// 域名IP详细文件

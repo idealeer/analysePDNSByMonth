@@ -68,6 +68,9 @@ func unionDNSFiles() {
 		variables.DNSFileUnionName = GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)		// 合并文件名称
 		variables.DNSFileName = variables.DNSFileUnionName
 		UnionDNSFileOnDir(variables.DNSFileDir, variables.DNSFileUnionName)		// 合并文件
+	} else if variables.DNSFileName != GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion){
+		variables.DNSFileUnionName = GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)		// 合并文件名称
+		ReverseDomain2UnionFile(variables.DNSFileName, variables.DNSFileUnionName)		// 合并文件
 	} else {								// 单个文件
 		variables.DNSFileUnionName = variables.DNSFileName
 		util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUnionName))

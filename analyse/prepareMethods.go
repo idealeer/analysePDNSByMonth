@@ -36,7 +36,7 @@ func PrepareFileDir(fileDir string) {
 		variables.DNSFileName = fileDir
 	}
 	// 创建临时文件夹
-	variables.DNSFileTempDir = variables.DNSFileDir + constants.DNSTempFolder
+	variables.DNSFileTempDir = variables.DNSFileDir + constants.DNSTempFolder + "-" + variables.DNSDateSpec + string(os.PathSeparator)
 	fg, err = os.Stat(variables.DNSFileTempDir)
 	if err != nil {
 		ec := os.Mkdir(variables.DNSFileTempDir, os.ModePerm)
@@ -46,7 +46,7 @@ func PrepareFileDir(fileDir string) {
 		}
 	}
 	// 创建结果文件夹
-	variables.DNSFileResDir = variables.DNSFileDir + constants.DNSResFolder
+	variables.DNSFileResDir = variables.DNSFileDir + constants.DNSResFolder + "-" + variables.DNSDateSpec + string(os.PathSeparator)
 	fg, err = os.Stat(variables.DNSFileResDir)
 	if err != nil {
 		ec := os.Mkdir(variables.DNSFileResDir, os.ModePerm)
@@ -149,13 +149,13 @@ func PrepareDate(date string, dateBefore string) {
 	if util.MatchRegexp(constants.DateRegexp, date) {
 		variables.DNSDateSpec = date
 	} else{
-		util.LogRecord(fmt.Sprintf("Error: Please add the correct [-date parm], like %s", constants.DateExample))
+		fmt.Printf("Error: Please add the correct [-date parm], like %s\n", constants.DateExample)
 		os.Exit(1)
 	}
 	if util.MatchRegexp(constants.DateRegexp, dateBefore) {
 		variables.DNSDateBefore = dateBefore
 	} else{
-		util.LogRecord(fmt.Sprintf("Error: Please add the correct [-date-before parm], like %s", constants.DateExample))
+		fmt.Printf("Error: Please add the correct [-date-before parm], like %s\n", constants.DateExample)
 		os.Exit(1)
 	}
 }
