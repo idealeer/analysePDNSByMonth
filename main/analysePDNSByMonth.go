@@ -24,6 +24,9 @@ var (
 	mmdb       		string 	// mmdb数据库
 	date       		string 	// 指定日期月份
 	dateBefore		string	// 先前日期月份
+	dateEnd			string	// 截止日期月份
+	inc				bool	// 月份递增
+	dec				bool 	// 月份递减
 	logShow    		bool   	// log输出到控制台
 	logFile    		bool   	// log记录到日志文件
 	logLevel   		int    	// log等级
@@ -89,6 +92,15 @@ func init() {
 
 	flag.StringVar(&dateBefore, "date-before", constants.DateExample,
 		fmt.Sprintf("%s", "先前日期月份"))
+
+	flag.StringVar(&dateEnd, "date-end", constants.DateExample,
+		fmt.Sprintf("%s", "结束日期月份"))
+
+	flag.BoolVar(&inc, "inc", false,
+		fmt.Sprintf("%s\n", "递增为假"))
+
+	flag.BoolVar(&dec, "dec", false,
+		fmt.Sprintf("%s\n", "递减为假"))
 
 	flag.BoolVar(&logShow, "log-show", true,
 		fmt.Sprintf("%s\n", "log输出到控制台(默认输出)") +
@@ -159,7 +171,7 @@ func main() {
 	flag.Parse()
 
 	// 初始化
-	analyse.PrepareDate(date, dateBefore)
+	analyse.PrepareDate(date, dateBefore, dateEnd)
 	analyse.PrepareFileDir(sourceDir)
 	analyse.PrepareLog(logShow, logFile, int8(logLevel))
 
@@ -194,6 +206,33 @@ func main() {
 		analyse.PrepareAPIResFile(apiResDir)
 		//analyse.PrepareDate(date, dateBefore)
 		analyse.ApiRes2JsonRes()
+	case constants.CmdAnalyseMul:
+
+		timeNow := time.Now()
+
+		var mList = make([]string, 0)
+		mList = analyse.PrepareOrder(inc, dec)
+
+		for _, ym := range mList {
+			util.LogRecord("Excuting: " + ym)
+
+			analyse.PrepareDate(ym, dateBefore, dateEnd)
+			analyse.PrepareFileDir(sourceDir)
+			analyse.PrepareLog(logShow, logFile, int8(logLevel))
+
+			analyse.PrepareBeforeResFile(util.NormalFileDir(beforeResDir) + "result-" + dateBefore)
+			analyse.PrepareD4File(d4File)
+			analyse.PrepareV46GeoFile(v4GeoFile, v6GeoFile)
+			analyse.PrepareMaxMind(mmdb)
+			analyse.PrepareZDNS(zdns, threads)
+			analyse.PrepareTopN(topN)
+			analyse.Analyse(ccmd)
+
+			dateBefore = ym
+
+			util.LogRecord(fmt.Sprintf("cost: %s", util.CostTime(timeNow)))
+			util.LogRecord("Task completed!!! " + ym)
+		}
 
 	default:
 		util.LogRecord("什么也没做\tPlease add the correct [-excute parm]")

@@ -139,8 +139,8 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 	// 读入先前Json结果，构建字典
 	beforeFile, eO := os.Open(fileBefore)
 	if eO != nil {
-		util.LogRecord(fmt.Sprintf("Error: %s", eO.Error()))
-		os.Exit(1)
+		util.LogRecord(fmt.Sprintf("Error: %s, no %s file found, no union", eO.Error(), fileBefore))
+		return
 	}
 	defer beforeFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
 	inBeforeFile := bufio.NewReader(beforeFile)

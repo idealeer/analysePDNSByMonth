@@ -66,9 +66,8 @@ func analysePrepare(ccmd uint8) {
 	合并dns文件
  */
 func unionDNSFiles() {
-	if variables.DNSFileName == "" {		// 多个文件进行合并
+	if variables.DNSFileName == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)) {		// 多个文件进行合并
 		variables.DNSFileUnionName = GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)		// 合并文件名称
-		variables.DNSFileName = variables.DNSFileUnionName
 		UnionDNSFileOnDir(variables.DNSFileDir, variables.DNSFileUnionName)		// 合并文件
 	} else if variables.DNSFileName != GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion){
 		variables.DNSFileUnionName = GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)		// 合并文件名称
@@ -84,9 +83,9 @@ func unionDNSFiles() {
  */
 func uniqDomain() {
 	unionDNSFiles()
-	if variables.DNSFileUniqDomain == "" {
+	if variables.DNSFileUniqDomain == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUniqDomain, constants.DNSFileTempExtion)) {
 		variables.DNSFileUniqDomain = GetTmpFileName(constants.DNSFileUniqDomain, constants.DNSFileTempExtion)
-		if variables.DNSFileUniqDomainIPv4 == "" {
+		if variables.DNSFileUniqDomainIPv4 == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)) {
 			variables.DNSFileUniqDomainIPv4 = GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)
 		}
 		uniqueDomain(variables.DNSFileUnionName, variables.DNSFileUniqDomain, variables.DNSFileUniqDomainIPv4)
@@ -100,20 +99,20 @@ func uniqDomain() {
  */
 func lpIPv4ByFileMulCH() {
 	uniqDomain()
-	if variables.DNSFileUniqDomainIPv4Detl == "" {
+	if variables.DNSFileUniqDomainIPv4Detl == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUniqDomainIPv4Detl, constants.DNSFileTempExtion)) {
 		variables.DNSFileUniqDomainIPv4Detl = GetTmpFileName(constants.DNSFileUniqDomainIPv4Detl, constants.DNSFileTempExtion)
 		if util.FileIsNotExist(variables.DNSFileUniqDomainIPv4Detl) {
 			zdnslookUpIPByFile(variables.DNSFileUniqDomain, variables.DNSFileUniqDomainIPv4Detl)
-			if variables.DNSFileUniqDomainIPv4 == "" {
-				variables.DNSFileUniqDomainIPv4 = GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)
-			}
 			// 此处为提取v4地址，此处可能已经存在域名v4地址文件，去重时查询已经存在的域名v4字典库，因此文件创建模式为append
+			variables.DNSFileUniqDomainIPv4 = GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)
 			getSimpleIPv4(variables.DNSFileUniqDomainIPv4Detl, variables.DNSFileUniqDomainIPv4)
 		} else {
 			util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4Detl))
+			util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4))
 		}
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4Detl))
+		util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4))
 	}
 }
 
@@ -122,7 +121,7 @@ func lpIPv4ByFileMulCH() {
  */
 func unionDNSAndIPv4() {
 	lpIPv4ByFileMulCH()
-	if variables.DNSFileUnionV4Name == "" {
+	if variables.DNSFileUnionV4Name == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUnionV4Name, constants.DNSFileTempExtion)) {
 		variables.DNSFileUnionV4Name = GetTmpFileName(constants.DNSFileUnionV4Name, constants.DNSFileTempExtion)
 		unionDNSRecordAndIP(variables.DNSFileUnionName, variables.DNSFileUniqDomainIPv4, variables.DNSFileUnionV4Name)
 	} else {
@@ -189,7 +188,7 @@ func analyseByGeo(ccmd uint8) {
 	第一：合并V6V4地理
  */
 func unionV6V4Geo() {
-	if variables.DNSFileV6GeoV4GeoName == "" {
+	if variables.DNSFileV6GeoV4GeoName == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileV6GeoV4GeoName, constants.DNSFileTempExtion)) {
 		variables.DNSFileV6GeoV4GeoName = GetTmpFileName(constants.DNSFileV6GeoV4GeoName, constants.DNSFileTempExtion)
 		getV6V4Geo(variables.DNSFileUnionV4Name, variables.DNSFileV6GeoV4GeoName)
 	} else {
@@ -202,7 +201,7 @@ func unionV6V4Geo() {
  */
 func anlyseDNSTimesV6V4Geo() {
 	unionV6V4Geo()
-	if variables.JsonV6DNSTimes == "" {
+	if variables.JsonV6DNSTimes == "" || util.FileIsNotExist(GetResFileName(constants.JsonV6DNSTimes + "-" + variables.DNSDateSpec, constants.JsonExtion)) {
 		variables.JsonV6DNSTimes = GetResFileName(constants.JsonV6DNSTimes + "-" + variables.DNSDateSpec, constants.JsonExtion)
 		analyseDNSRequestTimesByGeo(variables.DNSFileV6GeoV4GeoName, variables.JsonV6DNSTimes)
 	} else {
@@ -219,16 +218,14 @@ func anlyseDNSTimesV6V4Geo() {
 	合并DNS请求次数
  */
 func unonDNSTimesV6V4Geo() {
-	if variables.JsonV6DNSTimes == "" {
-		variables.JsonV6DNSTimes = GetResFileName(constants.JsonV6DNSTimes + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6DNSTimes = GetResFileName(constants.JsonV6DNSTimes+"-"+variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6DNSTimesBefore = GetBeforeResFileName(constants.JsonV6DNSTimes+"-By"+variables.DNSDateBefore, constants.JsonExtion)
+	variables.JsonV6DNSTimesTotal = GetResFileName(constants.JsonV6DNSTimes+"-By"+variables.DNSDateSpec, constants.JsonExtion)
+	if util.FileIsNotExist(variables.JsonV6DNSTimesTotal) {
+		unionJsonResult(variables.JsonV6DNSTimesBefore, variables.JsonV6DNSTimes, variables.JsonV6DNSTimesTotal)
+	} else {
+		util.LogRecord(fmt.Sprintf("union file %s existed", variables.JsonV6DNSTimesTotal))
 	}
-	if variables.JsonV6DNSTimesBefore == "" {
-		variables.JsonV6DNSTimesBefore = GetBeforeResFileName(constants.JsonV6DNSTimes + "-By" + variables.DNSDateBefore, constants.JsonExtion)
-	}
-	if variables.JsonV6DNSTimesTotal == "" {
-		variables.JsonV6DNSTimesTotal = GetResFileName(constants.JsonV6DNSTimes + "-By" + variables.DNSDateSpec, constants.JsonExtion)
-	}
-	unionJsonResult(variables.JsonV6DNSTimesBefore, variables.JsonV6DNSTimes, variables.JsonV6DNSTimesTotal)
 }
 
 /*
@@ -236,7 +233,7 @@ func unonDNSTimesV6V4Geo() {
  */
 func uniqDomainByV6V4Geo() {
 	unionV6V4Geo()
-	if variables.DNSFileGeoUniqDomain == "" {
+	if variables.DNSFileGeoUniqDomain == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileGeoUniqDomain, constants.DNSFileTempExtion)) {
 		variables.DNSFileGeoUniqDomain = GetTmpFileName(constants.DNSFileGeoUniqDomain, constants.DNSFileTempExtion)
 		uniqueDomainByGeo(variables.DNSFileV6GeoV4GeoName, variables.DNSFileGeoUniqDomain)
 	} else {
@@ -249,7 +246,7 @@ func uniqDomainByV6V4Geo() {
  */
 func anlyseDomainV6V4Geo() {
 	uniqDomainByV6V4Geo()
-	if variables.JsonV6DomainAlive == "" {
+	if variables.JsonV6DomainAlive == "" || util.FileIsNotExist(GetResFileName(constants.JsonV6DomainAlive+"-"+variables.DNSDateSpec, constants.JsonExtion)) {
 		variables.JsonV6DomainAlive = GetResFileName(constants.JsonV6DomainAlive+"-"+variables.DNSDateSpec, constants.JsonExtion)
 		analyseAliveDomainByGeo(variables.DNSFileGeoUniqDomain, variables.JsonV6DomainAlive)
 	} else {
@@ -266,24 +263,19 @@ func anlyseDomainV6V4Geo() {
 	合并活跃域名
  */
 func unonDomainV6V4Geo() {
-	if variables.JsonV6DomainAlive == "" {
-		variables.JsonV6DomainAlive = GetResFileName(constants.JsonV6DomainAlive + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6DomainAlive = GetResFileName(constants.JsonV6DomainAlive+"-"+variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6DomainAliveBefore = GetBeforeResFileName(constants.JsonV6DomainAlive+"-By"+variables.DNSDateBefore, constants.JsonExtion)
+	variables.JsonV6DomainAliveTotal = GetResFileName(constants.JsonV6DomainAlive+"-By"+variables.DNSDateSpec, constants.JsonExtion)
+	if util.FileIsNotExist(variables.JsonV6DomainAliveTotal) {
+		unionJsonResult(variables.JsonV6DomainAliveBefore, variables.JsonV6DomainAlive, variables.JsonV6DomainAliveTotal)
 	}
-	if variables.JsonV6DomainAliveBefore == "" {
-		variables.JsonV6DomainAliveBefore = GetBeforeResFileName(constants.JsonV6DomainAlive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
-	}
-	if variables.JsonV6DomainAliveTotal == "" {
-		variables.JsonV6DomainAliveTotal = GetResFileName(constants.JsonV6DomainAlive + "-By" + variables.DNSDateSpec, constants.JsonExtion)
-	}
-	unionJsonResult(variables.JsonV6DomainAliveBefore, variables.JsonV6DomainAlive, variables.JsonV6DomainAliveTotal)
 }
-
 /*
 	第三：去重IPv6
  */
 func uniqIPv6ByV6V4Geo() {
 	unionV6V4Geo()
-	if variables.DNSFileGeoUniqIPv6 == "" {
+	if variables.DNSFileGeoUniqIPv6 == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileGeoUniqIPv6, constants.DNSFileTempExtion)) {
 		variables.DNSFileGeoUniqIPv6 = GetTmpFileName(constants.DNSFileGeoUniqIPv6, constants.DNSFileTempExtion)
 		uniqueIPv6ByGeo(variables.DNSFileV6GeoV4GeoName, variables.DNSFileGeoUniqIPv6)
 	} else {
@@ -296,7 +288,7 @@ func uniqIPv6ByV6V4Geo() {
  */
 func anlyseIPv6V6V4Geo() {
 	uniqIPv6ByV6V4Geo()
-	if variables.JsonV6IPv6Alive == "" {
+	if variables.JsonV6IPv6Alive == "" || util.FileIsNotExist(GetResFileName(constants.JsonV6IPv6Alive+"-"+variables.DNSDateSpec, constants.JsonExtion)) {
 		variables.JsonV6IPv6Alive = GetResFileName(constants.JsonV6IPv6Alive+"-"+variables.DNSDateSpec, constants.JsonExtion)
 		analyseAliveIPv6ByGeo(variables.DNSFileGeoUniqIPv6, variables.JsonV6IPv6Alive)
 	} else {
@@ -313,16 +305,12 @@ func anlyseIPv6V6V4Geo() {
 	合并活跃IPv6
  */
 func unonIPv6V6V4Geo() {
-	if variables.JsonV6IPv6Alive == "" {
-		variables.JsonV6IPv6Alive = GetResFileName(constants.JsonV6IPv6Alive + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6IPv6Alive = GetResFileName(constants.JsonV6IPv6Alive+"-"+variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6IPv6AliveBefore = GetBeforeResFileName(constants.JsonV6IPv6Alive+"-By"+variables.DNSDateBefore, constants.JsonExtion)
+	variables.JsonV6IPv6AliveTotal = GetResFileName(constants.JsonV6IPv6Alive+"-By"+variables.DNSDateSpec, constants.JsonExtion)
+	if util.FileIsNotExist(variables.JsonV6IPv6AliveTotal) {
+		unionJsonResult(variables.JsonV6IPv6AliveBefore, variables.JsonV6IPv6Alive, variables.JsonV6IPv6AliveTotal)
 	}
-	if variables.JsonV6IPv6AliveBefore == "" {
-		variables.JsonV6IPv6AliveBefore = GetBeforeResFileName(constants.JsonV6IPv6Alive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
-	}
-	if variables.JsonV6IPv6AliveTotal == "" {
-		variables.JsonV6IPv6AliveTotal = GetResFileName(constants.JsonV6IPv6Alive + "-By" + variables.DNSDateSpec, constants.JsonExtion)
-	}
-	unionJsonResult(variables.JsonV6IPv6AliveBefore, variables.JsonV6IPv6Alive, variables.JsonV6IPv6AliveTotal)
 }
 
 /*
@@ -330,7 +318,7 @@ func unonIPv6V6V4Geo() {
  */
 func uniqSLDByV6V4Geo() {
 	unionV6V4Geo()
-	if variables.DNSFileV6GeoUniqSLD == "" || variables.DNSFileV4GeoUniqSLD == "" {
+	if variables.DNSFileV6GeoUniqSLD == "" || variables.DNSFileV4GeoUniqSLD == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileV6GeoUniqSLD, constants.DNSFileTempExtion)) || util.FileIsNotExist(GetTmpFileName(constants.DNSFileV4GeoUniqSLD, constants.DNSFileTempExtion)) {
 		variables.DNSFileV6GeoUniqSLD = GetTmpFileName(constants.DNSFileV6GeoUniqSLD, constants.DNSFileTempExtion)
 		variables.DNSFileV4GeoUniqSLD = GetTmpFileName(constants.DNSFileV4GeoUniqSLD, constants.DNSFileTempExtion)
 		uniqueSLDByGeo(variables.DNSFileV6GeoV4GeoName, variables.DNSFileV6GeoUniqSLD, variables.DNSFileV4GeoUniqSLD)
@@ -344,7 +332,7 @@ func uniqSLDByV6V4Geo() {
  */
 func anlyseSLDV6V4Geo() {
 	uniqSLDByV6V4Geo()
-	if variables.JsonV6SLDAlive == "" {
+	if variables.JsonV6SLDAlive == "" || util.FileIsNotExist(GetResFileName(constants.JsonV6SLDAlive+"-"+variables.DNSDateSpec, constants.JsonExtion)) {
 		variables.JsonV6SLDAlive = GetResFileName(constants.JsonV6SLDAlive+"-"+variables.DNSDateSpec, constants.JsonExtion)
 		analyseAliveSLDByGeo(variables.DNSFileV6GeoUniqSLD, variables.DNSFileV4GeoUniqSLD, variables.JsonV6SLDAlive)
 	} else {
@@ -361,16 +349,12 @@ func anlyseSLDV6V4Geo() {
 	合并活跃SLD
  */
 func unonSLDV6V4Geo() {
-	if variables.JsonV6SLDAlive == "" {
-		variables.JsonV6SLDAlive = GetResFileName(constants.JsonV6SLDAlive + "-" + variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6SLDAlive = GetResFileName(constants.JsonV6SLDAlive+"-"+variables.DNSDateSpec, constants.JsonExtion)
+	variables.JsonV6SLDAliveBefore = GetBeforeResFileName(constants.JsonV6SLDAlive+"-By"+variables.DNSDateBefore, constants.JsonExtion)
+	variables.JsonV6SLDAliveTotal = GetResFileName(constants.JsonV6SLDAlive+"-By"+variables.DNSDateSpec, constants.JsonExtion)
+	if util.FileIsNotExist(variables.JsonV6SLDAliveTotal) {
+		unionJsonResult(variables.JsonV6SLDAliveBefore, variables.JsonV6SLDAlive, variables.JsonV6SLDAliveTotal)
 	}
-	if variables.JsonV6SLDAliveBefore == "" {
-		variables.JsonV6SLDAliveBefore = GetBeforeResFileName(constants.JsonV6SLDAlive + "-By" + variables.DNSDateBefore, constants.JsonExtion)
-	}
-	if variables.JsonV6SLDAliveTotal == "" {
-		variables.JsonV6SLDAliveTotal = GetResFileName(constants.JsonV6SLDAlive + "-By" + variables.DNSDateSpec, constants.JsonExtion)
-	}
-	unionJsonResult(variables.JsonV6SLDAliveBefore, variables.JsonV6SLDAlive, variables.JsonV6SLDAliveTotal)
 }
 
 /*
@@ -378,7 +362,7 @@ func unonSLDV6V4Geo() {
  */
 func anlyseSLDTimesV6V4Geo() {
 	uniqSLDByV6V4Geo()
-	if variables.JsonV6SLDTimes == "" {
+	if variables.JsonV6SLDTimes == "" || util.FileIsNotExist(GetResFileName(constants.JsonV6SLDTimes+"-"+variables.DNSDateSpec, constants.JsonExtion)) {
 		variables.JsonV6SLDTimes = GetResFileName(constants.JsonV6SLDTimes+"-"+variables.DNSDateSpec, constants.JsonExtion)
 		analyseSLDRequestTimesByGeo(variables.DNSFileV6GeoUniqSLD, variables.DNSFileV4GeoUniqSLD, variables.JsonV6SLDTimes)
 	} else {
@@ -411,7 +395,7 @@ func analyseTLD(ccmd uint8) {
  */
 func uniqTLD() {
 	unionDNSFiles()
-	if variables.DNSFileUniqTLD == "" {
+	if variables.DNSFileUniqTLD == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUniqTLD, constants.DNSFileTempExtion)) {
 		variables.DNSFileUniqTLD = GetTmpFileName(constants.DNSFileUniqTLD, constants.DNSFileTempExtion)
 		uniqueTLD(variables.DNSFileUnionName, variables.DNSFileUniqTLD)
 	} else {
@@ -424,7 +408,7 @@ func uniqTLD() {
  */
 func anlyseTLD() {
 	uniqTLD()
-	if variables.JsonTLDTimes == "" {
+	if variables.JsonTLDTimes == "" || util.FileIsNotExist(GetResFileName(constants.JsonTLDTimes+"-"+variables.DNSDateSpec, constants.JsonExtion)) {
 		variables.JsonTLDTimes = GetResFileName(constants.JsonTLDTimes+"-"+variables.DNSDateSpec, constants.JsonExtion)
 		analyseTLDRequestTimes(variables.DNSFileUniqTLD, variables.JsonTLDTimes)
 	} else {

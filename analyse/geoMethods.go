@@ -50,7 +50,6 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 
 		var readedCount uint64 = 0
 		var readedTotal uint64 = 0
-		fileLines := util.GetLines(dnsRCDFileName)
 
 		// ip对应国家字典
 		var ip4GeoMap = make(types.TPMSS)
@@ -65,6 +64,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 			}
 			defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
 			inIPFile := bufio.NewReader(ipFile)
+			fileLines := util.GetLines(variables.V4GeoFileName)
 			for {
 				if readedCount%variables.LogShowBigLag == 0 {
 					readedCount = 0
@@ -97,6 +97,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 			}
 			defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
 			inIPFile := bufio.NewReader(ipFile)
+			fileLines := util.GetLines(variables.V6GeoFileName)
 			for {
 				if readedCount%variables.LogShowBigLag == 0 {
 					readedCount = 0
@@ -121,6 +122,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 		// 遍历查询地理
 		readedTotal = 0
 		readedCount = 0
+		fileLines := util.GetLines(dnsRCDFileName)
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
 				readedCount = 0

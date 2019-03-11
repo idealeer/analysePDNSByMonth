@@ -172,6 +172,8 @@ const (
 	CmdTest
 	CmdApi2Json																	// api结果转json
 
+	CmdAnalyseMul																// 分析多个相邻月份
+
 	CmdDefault
 )
 //

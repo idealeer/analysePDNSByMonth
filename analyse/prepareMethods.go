@@ -17,6 +17,7 @@ import (
 	"github.com/oschwald/geoip2-golang"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -169,6 +170,54 @@ func PrepareLog(logShow bool, logFile bool, logShowLev int8) {
 }
 
 /*
+	递增递减
+ */
+func PrepareOrder(inc bool, dec bool) []string {
+	if (inc || dec) == false {
+		fmt.Printf("Error: Please add [-inc] or [-dec]\n")
+		os.Exit(1)
+	}
+	if (inc && dec) == true {
+		fmt.Printf("Error: Please not add [-inc] and [-dec]\n")
+		os.Exit(1)
+	}
+	var mList = make([]string, 0)
+	if inc {
+		if variables.DNSDateSpec > variables.DNSDateEnd {
+			fmt.Printf("Error: Please add the correct [-date parm] and [-date-end parm]\n")
+			os.Exit(1)
+		}
+		dateInt, _:= strconv.Atoi(variables.DNSDateSpec)
+		dateEndInt, _:= strconv.Atoi(variables.DNSDateEnd)
+		sy := dateInt / 100
+		sm := dateInt % 100
+		ey := dateEndInt / 100
+		em := dateEndInt % 100
+		mList, _ = util.GetSpecYMsByYM(sy, sm, ey, em)
+		return mList
+	}
+	if dec {
+		if variables.DNSDateSpec < variables.DNSDateEnd {
+			fmt.Printf("Error: Please add the correct [-date parm] and [-date-end parm]\n")
+			os.Exit(1)
+		}
+		dateInt, _:= strconv.Atoi(variables.DNSDateEnd)
+		dateEndInt, _:= strconv.Atoi(variables.DNSDateSpec)
+		sy := dateInt / 100
+		sm := dateInt % 100
+		ey := dateEndInt / 100
+		em := dateEndInt % 100
+		mList, _ = util.GetSpecYMsByYM(sy, sm, ey, em)
+		for i, j := 0, len(mList)-1; i < j; i, j = i+1, j-1 {
+			mList[i], mList[j] = mList[j], mList[i]
+		}
+		return mList
+	}
+	return mList
+}
+
+
+/*
 	MaxMind数据库准备
  */
 func PrepareMaxMind(fileName string) {
@@ -196,7 +245,7 @@ func PrepareMaxMind(fileName string) {
 /*
 	日期月份准备
  */
-func PrepareDate(date string, dateBefore string) {
+func PrepareDate(date string, dateBefore string, dateEnd string) {
 	if util.MatchRegexp(constants.DateRegexp, date) {
 		variables.DNSDateSpec = date
 	} else{
@@ -207,6 +256,12 @@ func PrepareDate(date string, dateBefore string) {
 		variables.DNSDateBefore = dateBefore
 	} else{
 		fmt.Printf("Error: Please add the correct [-date-before parm], like %s\n", constants.DateExample)
+		os.Exit(1)
+	}
+	if util.MatchRegexp(constants.DateRegexp, dateEnd) {
+		variables.DNSDateEnd = dateEnd
+	} else{
+		fmt.Printf("Error: Please add the correct [-date-end parm], like %s\n", constants.DateExample)
 		os.Exit(1)
 	}
 }
