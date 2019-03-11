@@ -85,10 +85,42 @@ func PrepareD4File(fileDir string) {
 			os.Exit(1)
 		}
 		if fg.IsDir() { // 目录
-			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-beforeRes-dir parm]", err.Error()))
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-d4-file parm]", err.Error()))
 			os.Exit(1)
 		} else { // 文件
 			variables.D4FileName = fileDir
+		}
+	}
+}
+
+/*
+	ip地理字典文件
+ */
+func PrepareV46GeoFile(v4File string, v6File string) {
+	if v4File != "" {
+		fg, err := os.Stat(v4File)
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-v4Geo-file parm]", err.Error()))
+			os.Exit(1)
+		}
+		if fg.IsDir() { // 目录
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-v4Geo-file parm]", err.Error()))
+			os.Exit(1)
+		} else { // 文件
+			variables.V4GeoFileName = v4File
+		}
+	}
+	if v6File != "" {
+		fg, err := os.Stat(v6File)
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-v6Geo-file parm]", err.Error()))
+			os.Exit(1)
+		}
+		if fg.IsDir() { // 目录
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-v6Geo-file parm]", err.Error()))
+			os.Exit(1)
+		} else { // 文件
+			variables.V6GeoFileName = v6File
 		}
 	}
 }

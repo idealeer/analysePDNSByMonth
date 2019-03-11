@@ -42,8 +42,9 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var domainMap= make(types.TPMSS)
+		var domainMap = make(types.TPMSS)
 
+		// 去除重复域名
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
 				readedCount = 0
@@ -65,6 +66,7 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 		util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
 		util.LogRecord(fmt.Sprintf("total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 
+		// 重复域名输出
 		fw, err := os.OpenFile(fileNameNew, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
 		defer fw.Close()
 		if err != nil {
@@ -73,7 +75,7 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 		}
 		outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
 
-		// 保存去重域名，如果提供域名v4地址字典，则直接写入域名v4地址文件，不用再次nslook查询
+		// 保存去重域名，如果提供域名v4地址字典，则不必写入域名v4地址文件，不用再次nslook查询
 		if variables.D4FileName == "" {
 			readedTotal = 0
 			for domain, _ := range domainMap {
@@ -107,6 +109,7 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 			}
 			defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
 			inIPFile := bufio.NewReader(ipFile)
+
 			for {
 				if readedCount%variables.LogShowBigLag == 0 {
 					readedCount = 0

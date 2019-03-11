@@ -40,6 +40,8 @@ var (
 	beforeResDir	string	// 已有结果文件夹
 	apiResDir		string	// 历史结果-API类型文件夹
 	d4File			string  // 域名、v4地址字典库
+	v4GeoFile		string	// v4地理库
+	v6GeoFile		string	// v6地理库
 )
 
 func init() {
@@ -143,6 +145,12 @@ func init() {
 	flag.StringVar(&d4File, "d4-file", "",
 		fmt.Sprintf("%s", "域名v4地址字典文件"))
 
+	flag.StringVar(&v4GeoFile, "v4Geo-file", "",
+		fmt.Sprintf("%s", "v4地理库文件"))
+
+	flag.StringVar(&v6GeoFile, "v6Geo-file", "",
+		fmt.Sprintf("%s", "v6地理库文件"))
+
 	flag.Usage = usage // 改变默认的usage
 }
 
@@ -166,6 +174,7 @@ func main() {
 	case constants.CmdAnalyse:
 		analyse.PrepareBeforeResFile(beforeResDir)
 		analyse.PrepareD4File(d4File)
+		analyse.PrepareV46GeoFile(v4GeoFile, v6GeoFile)
 		analyse.PrepareMaxMind(mmdb)
 		analyse.PrepareZDNS(zdns, threads)
 		analyse.PrepareTopN(topN)

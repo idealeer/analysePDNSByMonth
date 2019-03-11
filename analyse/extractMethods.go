@@ -33,6 +33,18 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 	}
 	outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
 
+	// 同时保存到d4文件，便于下次使用
+	var outWFile4 *bufio.Writer
+	if variables.D4FileName != "" {
+		fw4, err4 := os.OpenFile(variables.D4FileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755) // 打开或创建文件
+		defer fw4.Close()
+		if err4 != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err4.Error()))
+			os.Exit(1)
+		}
+		outWFile4 = bufio.NewWriter(fw4) // 创建新的 Writer 对象
+	}
+
 	srcFile, err := os.Open(fileName)
 	if err != nil {
 		util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
@@ -65,6 +77,15 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 			continue
 		}
 		outWFile.Flush()
+
+		if variables.D4FileName != "" {
+			_, err = outWFile4.WriteString(zdnsDomainIPv4 + "\n")
+			if err != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+				continue
+			}
+			outWFile4.Flush()
+		}
 	}
 	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
 
