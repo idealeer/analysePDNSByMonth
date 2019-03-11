@@ -23,10 +23,12 @@ func Analyse(ccmd uint8) {
 	switch {
 	case ccmd >= constants.CCmdUnionDNS && ccmd <= constants.CCmdUnionDNSV4:
 		analysePrepare(ccmd)
-	case ccmd == constants.CCmdAll || (ccmd >= constants.CCmdGetGeo && ccmd < constants.CCmdDefault):
+	case ccmd == constants.CCmdAll || (ccmd >= constants.CCmdGetGeo && ccmd <= constants.CCmdAnaSLDTimesByGeo):
 		analyseByGeo(ccmd)
 	case ccmd == constants.CCmdUniqTLD || ccmd == constants.CCmdAnaTLDTimes:
 		analyseTLD(ccmd)
+	case ccmd == constants.CCmdUnionBeforeRes:
+		unionBeforeRes()
 	default:
 		util.LogRecord("什么也没做\tPlease add the correct [-function parm]")
 	}
@@ -84,7 +86,10 @@ func uniqDomain() {
 	unionDNSFiles()
 	if variables.DNSFileUniqDomain == "" {
 		variables.DNSFileUniqDomain = GetTmpFileName(constants.DNSFileUniqDomain, constants.DNSFileTempExtion)
-		uniqueDomain(variables.DNSFileUnionName, variables.DNSFileUniqDomain)
+		if variables.DNSFileUniqDomainIPv4 == "" {
+			variables.DNSFileUniqDomainIPv4 = GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)
+		}
+		uniqueDomain(variables.DNSFileUnionName, variables.DNSFileUniqDomain, variables.DNSFileUniqDomainIPv4)
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomain))
 	}
@@ -99,17 +104,16 @@ func lpIPv4ByFileMulCH() {
 		variables.DNSFileUniqDomainIPv4Detl = GetTmpFileName(constants.DNSFileUniqDomainIPv4Detl, constants.DNSFileTempExtion)
 		if util.FileIsNotExist(variables.DNSFileUniqDomainIPv4Detl) {
 			zdnslookUpIPByFile(variables.DNSFileUniqDomain, variables.DNSFileUniqDomainIPv4Detl)
+			if variables.DNSFileUniqDomainIPv4 == "" {
+				variables.DNSFileUniqDomainIPv4 = GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)
+			}
+			// 此处为提取v4地址，此处可能已经存在域名v4地址文件，去重时查询已经存在的域名v4字典库，因此文件创建模式为append
+			getSimpleIPv4(variables.DNSFileUniqDomainIPv4Detl, variables.DNSFileUniqDomainIPv4)
 		} else {
 			util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4Detl))
 		}
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4Detl))
-	}
-	if variables.DNSFileUniqDomainIPv4 == "" {
-		variables.DNSFileUniqDomainIPv4 = GetTmpFileName(constants.DNSFileUniqDomainIPv4, constants.DNSFileTempExtion)
-		getSimpleIPv4(variables.DNSFileUniqDomainIPv4Detl, variables.DNSFileUniqDomainIPv4)
-	} else {
-		util.LogRecord(fmt.Sprintf("%s existed", variables.DNSFileUniqDomainIPv4))
 	}
 }
 
@@ -500,6 +504,20 @@ func UnionFiles(fileDir string) {
 
 func GetGeoPercentByFile(fileName string) {
 	getGeoPercentByFile(fileName)
+}
+
+//// 合并历史结果文件
+func unionBeforeRes() {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: ")
+
+	unonDNSTimesV6V4Geo()
+	unonIPv6V6V4Geo()
+	unonDomainV6V4Geo()
+	unonSLDV6V4Geo()
+
+	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
+	util.LogRecord("Ending: ")
 }
 
 //// api类型结果转json

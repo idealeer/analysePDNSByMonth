@@ -75,6 +75,25 @@ func PrepareBeforeResFile(fileDir string) {
 }
 
 /*
+	域名v4地址字典文件
+ */
+func PrepareD4File(fileDir string) {
+	if fileDir != "" {
+		fg, err := os.Stat(fileDir)
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-d4-file parm]", err.Error()))
+			os.Exit(1)
+		}
+		if fg.IsDir() { // 目录
+			util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-beforeRes-dir parm]", err.Error()))
+			os.Exit(1)
+		} else { // 文件
+			variables.D4FileName = fileDir
+		}
+	}
+}
+
+/*
 	历史结果文件API类型
  */
 func PrepareAPIResFile(fileDir string) {

@@ -39,6 +39,7 @@ var (
 	topN	   		int    	// topN显示
 	beforeResDir	string	// 已有结果文件夹
 	apiResDir		string	// 历史结果-API类型文件夹
+	d4File			string  // 域名、v4地址字典库
 )
 
 func init() {
@@ -73,6 +74,8 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaIPv6ByGeo, "统计PDNS数据:分析活跃IPv6\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaSLDByGeo, "统计PDNS数据:分析活跃SLD\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaSLDTimesByGeo, "统计PDNS数据:分析SLD请求次数\t(须指定:-excute [0])")+
+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdUnionBeforeRes, "统计PDNS数据:合并历史结果文件\t(须指定:-excute [0])")+
 
 			fmt.Sprintf("%d\t%s", constants.CCmdDefault, "什么也没做(默认)"))
 
@@ -137,6 +140,9 @@ func init() {
 	flag.StringVar(&apiResDir, "apiRes-dir", "",
 		fmt.Sprintf("%s", "历史结果API类型文件夹"))
 
+	flag.StringVar(&d4File, "d4-file", "",
+		fmt.Sprintf("%s", "域名v4地址字典文件"))
+
 	flag.Usage = usage // 改变默认的usage
 }
 
@@ -159,6 +165,7 @@ func main() {
 	switch cmd {
 	case constants.CmdAnalyse:
 		analyse.PrepareBeforeResFile(beforeResDir)
+		analyse.PrepareD4File(d4File)
 		analyse.PrepareMaxMind(mmdb)
 		analyse.PrepareZDNS(zdns, threads)
 		analyse.PrepareTopN(topN)

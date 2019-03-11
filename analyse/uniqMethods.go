@@ -23,11 +23,11 @@ import (
 )
 
 /*
-	去除重复域名
+	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询
  */
-func uniqueDomain(fileName string, fileNameNew string) {
+func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 	timeNow := time.Now()
-	util.LogRecord("Excuting: " +  fileName + " -> " + fileNameNew)
+	util.LogRecord("Excuting: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
 
 	if util.FileIsNotExist(fileNameNew) {
 		srcFile, err := os.Open(fileName)
@@ -73,27 +73,101 @@ func uniqueDomain(fileName string, fileNameNew string) {
 		}
 		outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
 
-		// 保存去重域名
-		readedTotal = 0
-		for domain, _ := range domainMap {
-			if readedTotal%variables.LogShowBigLag == 0 {
-				util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+		// 保存去重域名，如果提供域名v4地址字典，则直接写入域名v4地址文件，不用再次nslook查询
+		if variables.D4FileName == "" {
+			readedTotal = 0
+			for domain, _ := range domainMap {
+				if readedTotal%variables.LogShowBigLag == 0 {
+					util.LogRecord(fmt.Sprintf("writing uniqDomain total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+				}
+				readedTotal++
+				_, err = outWFile.WriteString(domain + "\n")
+				if err != nil {
+					util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+					continue
+				}
+				outWFile.Flush()
 			}
-			readedTotal++
-			_, err = outWFile.WriteString(domain + "\n")
-			if err != nil {
-				util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
-				continue
+			util.LogRecord(fmt.Sprintf("writing uniqDomain total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+		} else {
+			// 提供了域名v4地址字典文件
+			// 域名对应IP字典
+			var domainIPMap = make(types.TPMSS)
+
+			var readedCount uint64 = 0
+			var readedTotal uint64 = 0
+			var fileLines = util.GetLines(variables.D4FileName)
+			var domain string
+
+			// 读入ip文件，构建字典
+			ipFile, eO := os.Open(variables.D4FileName)
+			if eO != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", eO.Error()))
+				os.Exit(1)
 			}
-			outWFile.Flush()
+			defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+			inIPFile := bufio.NewReader(ipFile)
+			for {
+				if readedCount%variables.LogShowBigLag == 0 {
+					readedCount = 0
+					util.LogRecord(fmt.Sprintf("Create DomainIPMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+				}
+				domainIPBytes, _, eR := inIPFile.ReadLine()
+				if eR == io.EOF {
+					break
+				}
+				readedCount++
+				readedTotal++
+				domainIP := string(domainIPBytes)
+				domainIPList := strings.Split(domainIP, "\t")
+				domain = domainIPList[constants.UDomainIndex]
+				if _, ok := domainIPMap[domain]; !ok {
+					domainIPMap[domain] = domainIPList[constants.UIPv4Index]
+				}
+			}
+			util.LogRecord(fmt.Sprintf("Create DomainIPMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+			// 创建域名v4文件
+			d4File, eOO := os.OpenFile(d4FileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+			defer d4File.Close()
+			if eOO != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+				os.Exit(1)
+			}
+			outD4File := bufio.NewWriter(d4File)
+
+			// 遍历域名
+			readedTotal = 0
+			for domain, _ := range domainMap {
+				if readedTotal%variables.LogShowBigLag == 0 {
+					util.LogRecord(fmt.Sprintf("writing uniqDomain | uniqDomainIpv4 total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+				}
+				readedTotal++
+
+				if _, ok := domainIPMap[domain]; !ok {	// 需要ns查询，列入uniq文件
+					_, err = outWFile.WriteString(domain + "\n")
+					if err != nil {
+						util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+						continue
+					}
+					outWFile.Flush()
+				} else {	// 不需要ns查询
+					_, err = outD4File.WriteString(domain + "\t" + domainIPMap[domain] + "\n")
+					if err != nil {
+						util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+						continue
+					}
+					outD4File.Flush()
+				}
+			}
+			util.LogRecord(fmt.Sprintf("writing uniqDomain | uniqDomainIpv4 total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 		}
-		util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", fileNameNew, time.Now().Sub(timeNow) / time.Second))
 	}
 
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
-	util.LogRecord("Ending: " + fileName + " -> " + fileNameNew)
+	util.LogRecord("Ending: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
 }
 
 /*

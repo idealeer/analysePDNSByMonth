@@ -198,6 +198,8 @@ const (
 	CCmdAnaSLDByGeo       // 分析SLDBy地理
 	CCmdAnaSLDTimesByGeo  // 分析SLD请求次数By地理
 
+	CCmdUnionBeforeRes		// 合并历史结果
+
 	CCmdDefault
 )
 
