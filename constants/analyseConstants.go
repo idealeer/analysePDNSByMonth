@@ -137,6 +137,8 @@ const IPGeoExtion				string = "ig" 									// IP地理文件扩展名
 const UnionFileName				string = "UnionFile"							// 合并文件名称
 const UnionFileExtion			string = "uf"									// 合并文件扩展名
 
+// 错误记录文件
+
 //
 
 //// 字符串

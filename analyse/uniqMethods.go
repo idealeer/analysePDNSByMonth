@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -25,7 +26,7 @@ import (
 /*
 	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询
  */
-func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
+func uniqueDomainNoOpt(fileName string, fileNameNew string, d4FileName string) {
 	timeNow := time.Now()
 	util.LogRecord("Excuting: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
 
@@ -174,6 +175,156 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 }
 
 /*
+	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询
+ */
+func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
+
+	if util.FileIsNotExist(fileNameNew) {
+		srcFile, err := os.Open(fileName)
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+			os.Exit(1)
+		}
+		defer srcFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+		br := bufio.NewReader(srcFile)
+
+		var readedCount uint64 = 0
+		var readedTotal uint64 = 0
+		var fileLines uint64
+
+		var domainIPMap = make(types.TPMSS)
+
+		var outD4File *bufio.Writer		// 直接输出到uniqDomainV4文件，不需要ns查询
+
+		// 提供了域名v4地址字典文件, 创建域名对应IP字典
+		if variables.D4FileName != "" {
+			fileLines := util.GetLines(variables.D4FileName)
+			domainIPMap = make(types.TPMSS, fileLines)
+			var domain string
+
+			// 读入ip文件，构建字典
+			ipFile, eO := os.Open(variables.D4FileName)
+			if eO != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", eO.Error()))
+				os.Exit(1)
+			}
+			defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+			inIPFile := bufio.NewReader(ipFile)
+
+			for {
+				if readedCount%variables.LogShowBigLag == 0 {
+					readedCount = 0
+					util.LogRecord(fmt.Sprintf("Create DomainIPMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+				}
+				domainIPBytes, _, eR := inIPFile.ReadLine()
+				if eR == io.EOF {
+					break
+				}
+				readedCount++
+				readedTotal++
+				domainIP := string(domainIPBytes)
+				domainIPList := strings.Split(domainIP, "\t")
+				domain = domainIPList[constants.UDomainIndex]
+				if _, ok := domainIPMap[domain]; !ok {
+					domainIPMap[domain] = domainIPList[constants.UIPv4Index]
+				}
+			}
+			util.LogRecord(fmt.Sprintf("Create DomainIPMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+			// 创建域名v4文件
+			d4File, eOO := os.OpenFile(d4FileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+			defer d4File.Close()
+			if eOO != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+				os.Exit(1)
+			}
+			outD4File = bufio.NewWriter(d4File)
+		}
+
+		// 去除重复域名
+		readedCount = 0
+		readedTotal = 0
+		fileLines = util.GetLines(fileName)
+		var domainMap = make(types.TPMSS, constants.MapAllocLen)
+		for {
+			if readedCount%variables.LogShowBigLag == 0 {
+				readedCount = 0
+				util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+			}
+			dnsRecordBytes, _, e := br.ReadLine()
+			if e == io.EOF {
+				break
+			}
+			readedCount++
+			readedTotal++
+			dnsRecord := string(dnsRecordBytes)
+			dnsRecordList := strings.Split(dnsRecord, "\t")
+			dnsRecordDomain := dnsRecordList[constants.UNDomainIndex]
+
+			// 判断是否需要ns
+			if _, ok := domainIPMap[dnsRecordDomain]; !ok { // 需要ns查询，列入uniq文件
+				if _, ok := domainMap[dnsRecordDomain]; !ok {
+					domainMap[dnsRecordDomain] = ""
+				}
+			} else { // 不需要ns查询，直接输出到等d4文件
+				_, err1 := outD4File.WriteString(dnsRecordDomain + "\t" + domainIPMap[dnsRecordDomain] + "\n")
+				if err1 != nil {
+					util.LogRecord(fmt.Sprintf("Error: %s", err1.Error()))
+					continue
+				}
+				outD4File.Flush()
+			}
+		}
+		util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+		util.LogRecord(fmt.Sprintf("total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+		// 优化
+		domainIPMap = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
+		// 重复域名输出
+		fw, err2 := os.OpenFile(fileNameNew, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+		defer fw.Close()
+		if err2 != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err2.Error()))
+			os.Exit(1)
+		}
+		outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
+
+		readedTotal = 0
+		for domain, _ := range domainMap {
+			if readedTotal%variables.LogShowBigLag == 0 {
+				util.LogRecord(fmt.Sprintf("writing uniqDomain total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+			}
+			readedTotal++
+			_, err = outWFile.WriteString(domain + "\n")
+			if err != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+				continue
+			}
+			outWFile.Flush()
+		}
+
+		// 优化
+		domainMap = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
+		util.LogRecord(fmt.Sprintf("writing uniqDomain total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+	} else {
+		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", fileNameNew, time.Now().Sub(timeNow)/time.Second))
+	}
+
+	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
+	util.LogRecord("Ending: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
+}
+
+
+/*
 	地理：去除重复域名，签名：域名
  */
 func uniqueDomainByGeo(fileName string, fileNameNew string) {
@@ -194,7 +345,7 @@ func uniqueDomainByGeo(fileName string, fileNameNew string) {
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var domainMap= make(types.TPMSS) // 去重后域名map：[域名]("v6-cty\tv4-cty")
+		var domainMap = make(types.TPMSS, constants.MapAllocLen) // 去重后域名map：[域名]("v6-cty\tv4-cty")
 
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
@@ -246,10 +397,17 @@ func uniqueDomainByGeo(fileName string, fileNameNew string) {
 			}
 			outWFile.Flush()
 		}
+
+		// 优化
+		domainMap = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
 		util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", fileNameNew, time.Now().Sub(timeNow) / time.Second))
 	}
+
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	util.LogRecord("Ending: " + fileName + " -> " + fileNameNew)
 }
@@ -275,7 +433,7 @@ func uniqueIPv6ByGeo(fileName string, fileNameNew string) {
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var ipv6Map = make(types.TPMSS) // 去重后ipv6-map：[ipv6]("v6-cty\tv4cty")
+		var ipv6Map = make(types.TPMSS, constants.MapAllocLen) // 去重后ipv6-map：[ipv6]("v6-cty\tv4cty")
 
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
@@ -331,6 +489,12 @@ func uniqueIPv6ByGeo(fileName string, fileNameNew string) {
 			}
 			outWFile.Flush()
 		}
+
+		// 优化
+		ipv6Map = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
 		util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", fileNameNew, time.Now().Sub(timeNow) / time.Second))
@@ -362,7 +526,7 @@ func uniqueSLDByGeo(fileName string, v6UniqSLDFile string, v4UniqSLDFile string)
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var sldMap= make(types.TPMSTPMSI64) // 去重后SLD-map：[country]([sld](count))
+		var sldMap = make(types.TPMSTPMSI64, constants.MapAllocLen) // 去重后SLD-map：[country]([sld](count))
 
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
@@ -429,6 +593,12 @@ func uniqueSLDByGeo(fileName string, v6UniqSLDFile string, v4UniqSLDFile string)
 				outWFile.Flush()
 			}
 		}
+
+		// 优化
+		sldMap = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
 		util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", v6UniqSLDFile, time.Now().Sub(timeNow)/time.Second))
@@ -449,7 +619,7 @@ func uniqueSLDByGeo(fileName string, v6UniqSLDFile string, v4UniqSLDFile string)
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var sldMap= make(types.TPMSTPMSI64) // 去重后SLD-map：[country]([sld](count))
+		var sldMap = make(types.TPMSTPMSI64, constants.MapAllocLen) // 去重后SLD-map：[country]([sld](count))
 
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
@@ -515,6 +685,12 @@ func uniqueSLDByGeo(fileName string, v6UniqSLDFile string, v4UniqSLDFile string)
 				outWFile.Flush()
 			}
 		}
+
+		// 优化
+		sldMap = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
 		util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", v4UniqSLDFile, time.Now().Sub(timeNow)/time.Second))
@@ -544,7 +720,7 @@ func uniqueTLD(fileName string, fileNameNew string) {
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var tldMap = make(types.TPMSI64)
+		var tldMap = make(types.TPMSI64, 1000)
 
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
@@ -597,6 +773,12 @@ func uniqueTLD(fileName string, fileNameNew string) {
 			}
 			outWFile.Flush()
 		}
+
+		// 优化
+		tldMap = nil
+		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
+		debug.FreeOSMemory()
+
 		util.LogRecord(fmt.Sprintf("writing total: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 	} else {
 		util.LogRecord(fmt.Sprintf("%s existed, cost: %ds", fileNameNew, time.Now().Sub(timeNow) / time.Second))

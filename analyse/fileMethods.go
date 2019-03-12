@@ -96,6 +96,10 @@ func unionDNSFile(fileName string, outWFile *bufio.Writer) {
 
 		lineString := string(lineBytes)
 		dnsRecordList := strings.Split(lineString, "\t")
+		if len(dnsRecordList) != 3 {
+			util.LogRecord(fmt.Sprintf("Error record in %s: %s", fileName, lineString))
+			continue
+		}
 		dnsRecordCount := util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
 		dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
 		dnsRecordIPv6 := util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
@@ -229,3 +233,133 @@ func ReverseDomain2UnionFile(fileName string, fileNameNew string) {
 
 	util.LogRecord(fmt.Sprintf("Ending: %s -> %s", fileName, fileNameNew))
 }
+
+/*
+	单个文件合并
+ */
+func unionDNSFileMul(fileName string, fileNameNew string, res chan<- string) {
+	//timeNow := time.Now()
+	//LogRecord("Excuting: " + fileName)
+
+	// 打开源文件
+	srcFile, err := os.Open(fileName)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+		return
+	}
+	defer srcFile.Close()	// 该函数执行完毕退出前才会执行defer后的语句
+	br := bufio.NewReader(srcFile)
+
+	var readedCount uint64 = 0
+	var readedTotal uint64 = 0
+
+	fw, err1 := os.OpenFile(fileNameNew, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755) // 打开或创建文件
+	defer fw.Close()
+	if err1 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err1.Error()))
+		os.Exit(1)
+	}
+	outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
+
+	for {
+		if readedCount % variables.LogShowBigLag == 0 {
+			readedCount = 0
+			//LogRecord(fmt.Sprintf("readedtotal: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow) / time.Second))
+		}
+		lineBytes, _, eR := br.ReadLine()
+		if eR == io.EOF {
+			break
+		}
+		readedCount++
+		readedTotal++
+
+		lineString := string(lineBytes)
+		dnsRecordList := strings.Split(lineString, "\t")
+		if len(dnsRecordList) != 3 {
+			util.LogRecord(fmt.Sprintf("Error record in %s: %s", fileName, lineString))
+			continue
+		}
+		dnsRecordCount := util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
+		dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
+		dnsRecordIPv6 := util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
+		dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
+
+		_, err = outWFile.WriteString(dnsRecordNew + "\n")
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+			continue
+		}
+		outWFile.Flush()
+	}
+
+	res <- fileName
+	//LogRecord(fmt.Sprintf("readedtotal: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow) / time.Second))
+	//LogRecord("Ending: " + fileName)
+}
+
+/*
+	合并文件
+  */
+func UnionDNSFileOnDirMul(fileDir string, fileNameNew string) {
+	timeNow := time.Now()
+	fileDir = util.NormalFileDir(fileDir)
+	util.LogRecord(fmt.Sprintf("Excuting: %s -> %s", fileDir, fileNameNew))
+
+
+
+	// 合并后的文件不存在，则进行合并
+	if util.FileIsNotExist(fileNameNew) {
+		fw, err := os.OpenFile(fileNameNew, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+		defer fw.Close()
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+			os.Exit(1)
+		}
+		//outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
+
+		var returnFolder = make(chan string) 	// 并发合并文件
+
+		// 外层文件夹
+		folderList, e := ioutil.ReadDir(fileDir)
+		if e != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+			os.Exit(1)
+		}
+		for _, folderInfo := range folderList {
+
+			readedCount := 0
+			if IsTheDNSFolder(folderInfo) {
+				folderName := util.NormalFileDir(fileDir + folderInfo.Name())
+
+				// 内层文件夹
+				fileList, e := ioutil.ReadDir(folderName)
+				if e != nil {
+					util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+					os.Exit(1)
+				}
+				for _, fi := range fileList {
+					if IsTheDNSFile(fi) {
+						readedCount++
+						fileName := folderName + fi.Name()
+						go unionDNSFileMul(fileName, fileNameNew, returnFolder) // 合并文件
+					}
+				}
+
+				// 并发输出
+				for i := 0; i < readedCount; i++ {
+					dnsRecordNewTemp := <-returnFolder
+					util.LogRecord(fmt.Sprintf("ending: %s, cost: %ds", dnsRecordNewTemp, time.Now().Sub(timeNow)/time.Second))
+				}
+
+				util.LogRecord(fmt.Sprintf("ending: %s, cost: %ds", folderName, time.Now().Sub(timeNow)/time.Second))
+			}
+		}
+
+		util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
+	} else {
+		util.LogRecord(fmt.Sprintf("%s existed: %ds", fileNameNew, time.Now().Sub(timeNow) / time.Second))
+	}
+
+	util.LogRecord(fmt.Sprintf("Ending: %s -> %s", fileDir, fileNameNew))
+}
+

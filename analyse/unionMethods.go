@@ -31,11 +31,11 @@ func unionDNSRecordAndIP(dnsFileName string, ipFileName string, unionFileName st
 
 	if util.FileIsNotExist(unionFileName) {
 		// 域名对应IP字典
-		var domainIPMap= make(types.TPMSS)
-
 		var readedCount uint64 = 0
 		var readedTotal uint64 = 0
 		var fileLines = util.GetLines(ipFileName)
+		var domainIPMap = make(types.TPMSS, fileLines)
+
 		var domain string
 
 		// 读入ip文件，构建字典
@@ -131,8 +131,8 @@ func unionJsonResult(fileBefore string, fileNow string, fileTotal string) {
 	util.LogRecord("Excuting: " + fileBefore + " & " + fileNow + " -> " + fileTotal)
 
 	// 结果Map
-	var beforeMap = make(types.TPMSTPMSTPMSI64)
-	var nowMap = make(types.TPMSTPMSTPMSI64)
+	var beforeMap = make(types.TPMSTPMSTPMSI64, 200)
+	var nowMap = make(types.TPMSTPMSTPMSI64, 200)
 	//var totalMap = make(types.TPMSTPMSTPMSI64)		// beforeMap -> totalMap
 
 

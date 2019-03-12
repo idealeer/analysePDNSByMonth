@@ -47,7 +47,7 @@ func EndReserveResAndTemp() {
 	resBeforeDir := util.GetParDir(strings.TrimRight(variables.ResBeforeDir, string(os.PathSeparator))) + constants.DNSResFolder + "-" + variables.DNSDateSpec
 	err := os.Rename(variables.DNSFileResDir, resBeforeDir)
 	if err != nil {
-		util.LogRecord(fmt.Sprintf("Erros: %s", err.Error()))
+		util.LogRecord(fmt.Sprintf("Errors: %s", err.Error()))
 		os.Exit(1)
 	} else {
 		util.LogRecord(fmt.Sprintf("move ok: %s -> %s", variables.DNSFileResDir, resBeforeDir))
@@ -59,7 +59,7 @@ func EndReserveResAndTemp() {
 	if err1 != nil {
 		ec := os.Mkdir(tmpDir, os.ModePerm)
 		if ec != nil {
-			util.LogRecord(fmt.Sprintf("Erros: %s", err1.Error()))
+			util.LogRecord(fmt.Sprintf("Errors: %s", err1.Error()))
 			os.Exit(1)
 		}
 	}

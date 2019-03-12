@@ -189,14 +189,16 @@ func main() {
 
 	switch cmd {
 	case constants.CmdAnalyse:
-		analyse.PrepareBeforeResFile(beforeResDir)
+		analyse.PrepareBeforeResFile(util.NormalFileDir(beforeResDir) + constants.DNSResFolder + "-" + dateBefore)
 		analyse.PrepareD4File(d4File)
 		analyse.PrepareV46GeoFile(v4GeoFile, v6GeoFile)
 		analyse.PrepareMaxMind(mmdb)
 		analyse.PrepareZDNS(zdns, threads)
 		analyse.PrepareTopN(topN)
 		analyse.Analyse(ccmd)
-		analyse.EndReserveResAndTemp()
+		if ccmd == constants.CCmdAll || (ccmd >= constants.CCmdGetGeo && ccmd <= constants.CCmdAnaSLDTimesByGeo) {
+			analyse.EndReserveResAndTemp()
+		}
 	case constants.CmdMMDB:
 		analyse.PrepareMaxMind(mmdb)
 		analyse.GetIPsGeoByMM(ips, ipFile)
@@ -226,7 +228,7 @@ func main() {
 			analyse.PrepareFileDir(sourceDir)
 			analyse.PrepareLog(logShow, logFile, int8(logLevel))
 
-			analyse.PrepareBeforeResFile(util.NormalFileDir(beforeResDir) + "result-" + dateBefore)
+			analyse.PrepareBeforeResFile(util.NormalFileDir(beforeResDir) + constants.DNSResFolder + "-" + dateBefore)
 			analyse.PrepareD4File(d4File)
 			analyse.PrepareV46GeoFile(v4GeoFile, v6GeoFile)
 			analyse.PrepareMaxMind(mmdb)
