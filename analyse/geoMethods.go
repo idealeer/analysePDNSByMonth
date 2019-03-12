@@ -127,6 +127,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 		// ip对应国家字典-new
 		var ip4GeoMapNew = make(types.TPMSS, constants.MapAllocLen)
 		var ip6GeoMapNew = make(types.TPMSS, constants.MapAllocLen)
+
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
 				readedCount = 0
@@ -147,13 +148,15 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 
 			ipv4 := strings.Split(dnsRecordIPv4s, ";")[0]
 			ipv6 := strings.Split(dnsRecordIPv6s, ";")[0]
-			dnsRecordIPv6Geo := ""
-			dnsRecordIPv4Geo := ""
+			dnsRecordIPv6Geo := "null"
+			dnsRecordIPv4Geo := "null"
 
 			if _, ok := ip4GeoMap[ipv4]; !ok {
 				if _, ok := ip4GeoMapNew[ipv4]; !ok {
 					dnsRecordIPv4Geo = util.GetIPGeoByMM(ipv4, variables.MaxMindReader, constants.IPv4Geo, constants.NoIPv6Geo)
 					ip4GeoMapNew[ipv4] = dnsRecordIPv4Geo
+				} else {
+					dnsRecordIPv4Geo = ip4GeoMapNew[ipv4]
 				}
 			} else {
 				dnsRecordIPv4Geo = ip4GeoMap[ipv4]
@@ -163,6 +166,8 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 				if _, ok := ip6GeoMapNew[ipv6]; !ok {
 					dnsRecordIPv6Geo = util.GetIPGeoByMM(ipv6, variables.MaxMindReader, constants.NoIPv4Geo, constants.IPv6Geo)
 					ip6GeoMapNew[ipv6] = dnsRecordIPv6Geo
+				} else {
+					dnsRecordIPv6Geo = ip6GeoMapNew[ipv6]
 				}
 			} else {
 				dnsRecordIPv6Geo = ip6GeoMap[ipv6]
@@ -182,6 +187,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 		util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
 
 		// 保存ipv4地理库
+		readedCount = 0
 		if variables.V4GeoFileName != "" {
 			fw, err := os.OpenFile(variables.V4GeoFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755) // 打开或创建文件
 			defer fw.Close()
@@ -191,6 +197,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 			}
 			outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
 			for ip, _ := range ip4GeoMapNew {
+				readedCount ++
 				_, err = outWFile.WriteString(ip + "\t" + ip4GeoMapNew[ip] + "\n")
 				if err != nil {
 					util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
@@ -198,11 +205,11 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 				}
 				outWFile.Flush()
 			}
+			util.LogRecord(fmt.Sprintf("reserve v4Geo, add %d items, cost: %ds", readedCount, time.Now().Sub(timeNow)/time.Second))
 		}
 
-		util.LogRecord(fmt.Sprintf("reserve v4Geo, cost: %ds", time.Now().Sub(timeNow)/time.Second))
-
 		// 保存ipv6地理库
+		readedCount = 0
 		if variables.V6GeoFileName != "" {
 			fw6, err6 := os.OpenFile(variables.V6GeoFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755) // 打开或创建文件
 			defer fw6.Close()
@@ -212,6 +219,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 			}
 			outWFile6 := bufio.NewWriter(fw6) // 创建新的 Writer 对象
 			for ip, _ := range ip6GeoMapNew {
+				readedCount ++
 				_, err6 = outWFile6.WriteString(ip + "\t" + ip6GeoMapNew[ip] + "\n")
 				if err6 != nil {
 					util.LogRecord(fmt.Sprintf("Error: %s", err6.Error()))
@@ -219,8 +227,8 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 				}
 				outWFile6.Flush()
 			}
+			util.LogRecord(fmt.Sprintf("reserve v6Geo, add %d items, cost: %ds", readedCount, time.Now().Sub(timeNow)/time.Second))
 		}
-		util.LogRecord(fmt.Sprintf("reserve v6Geo, cost: %ds", time.Now().Sub(timeNow)/time.Second))
 
 		// 优化
 		ip4GeoMap = nil

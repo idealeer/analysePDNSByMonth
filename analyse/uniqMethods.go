@@ -248,6 +248,7 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 		readedTotal = 0
 		fileLines = util.GetLines(fileName)
 		var domainMap = make(types.TPMSS, constants.MapAllocLen)
+
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
 				readedCount = 0
@@ -285,7 +286,7 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 		util.LogRecord(fmt.Sprintf("debug.FreeOSMemory()"))
 		debug.FreeOSMemory()
 
-		// 重复域名输出
+		// 去重域名输出
 		fw, err2 := os.OpenFile(fileNameNew, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
 		defer fw.Close()
 		if err2 != nil {
