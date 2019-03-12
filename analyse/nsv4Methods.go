@@ -289,7 +289,7 @@ func zdnslookUpIPByFile(fileName string, fileNameNew string) {
 	cmd := []string{constants.ZDNSALookUp, "-input-file", fileName, "-output-file", fileNameNew, "-threads", strconv.Itoa(variables.ZDNSThreads)}
 	var fileLines uint64 = util.GetLines(fileName)
 	timeNow = time.Now()
-	dur, _ := time.ParseDuration(fmt.Sprintf("+%ds", fileLines / 15000000 * 60 * 60 * 4))
+	dur, _ := time.ParseDuration(fmt.Sprintf("+%ds", fileLines / 725))
 	util.LogRecord(fmt.Sprintf("zdns ALookUp will end at %s", timeNow.Add(dur).String()))
 	util.ZDNSLookUp(exe, cmd)
 

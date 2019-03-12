@@ -45,6 +45,7 @@ var (
 	d4File			string  // 域名、v4地址字典库
 	v4GeoFile		string	// v4地理库
 	v6GeoFile		string	// v6地理库
+	hisRecordDir	string  // 历史结果保存文件夹
 )
 
 func init() {
@@ -163,6 +164,9 @@ func init() {
 	flag.StringVar(&v6GeoFile, "v6Geo-file", "",
 		fmt.Sprintf("%s", "v6地理库文件"))
 
+	flag.StringVar(&hisRecordDir, "hisRecord-dir", "",
+		fmt.Sprintf("%s", "历史中间结果保存文件夹"))
+
 	flag.Usage = usage // 改变默认的usage
 }
 
@@ -173,6 +177,7 @@ func main() {
 	// 初始化
 	analyse.PrepareDate(date, dateBefore, dateEnd)
 	analyse.PrepareFileDir(sourceDir)
+	analyse.PrepareHisRecordDir(hisRecordDir)
 	analyse.PrepareLog(logShow, logFile, int8(logLevel))
 
 	// 命令执行、必须提供指定参数，如何实现
@@ -191,6 +196,7 @@ func main() {
 		analyse.PrepareZDNS(zdns, threads)
 		analyse.PrepareTopN(topN)
 		analyse.Analyse(ccmd)
+		analyse.EndReserveResAndTemp()
 	case constants.CmdMMDB:
 		analyse.PrepareMaxMind(mmdb)
 		analyse.GetIPsGeoByMM(ips, ipFile)
@@ -208,7 +214,7 @@ func main() {
 		analyse.ApiRes2JsonRes()
 	case constants.CmdAnalyseMul:
 
-		timeNow := time.Now()
+		timeNow1 := time.Now()
 
 		var mList = make([]string, 0)
 		mList = analyse.PrepareOrder(inc, dec)
@@ -230,8 +236,14 @@ func main() {
 
 			dateBefore = ym
 
-			util.LogRecord(fmt.Sprintf("cost: %s", util.CostTime(timeNow)))
+			analyse.EndReserveResAndTemp()
+
+			util.LogRecord(fmt.Sprintf("cost: %s", util.CostTime(timeNow1)))
 			util.LogRecord("Task completed!!! " + ym)
+
+			if ym != mList[len(mList) - 1] {
+				analyse.EndLog()
+			}
 		}
 
 	default:

@@ -9,11 +9,13 @@
 package main
 
 import (
+	"analysePDNSByMonth/util"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func run1() {
@@ -92,10 +94,58 @@ func runn() {
 	fmt.Println(string(opBytes))
 }
 
+/*
+	执行bash命令
+ */
+func ExcuteCmd(exe string, argu []string) string {
+	cmd := exec.Command(exe, argu...)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// 保证关闭输出流
+	defer stdout.Close()
+	// 运行命令
+	if err := cmd.Start(); err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
+	// 读取输出结果
+	opBytes, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
+	return string(opBytes)
+}
+
+func OsCmdMv() {
+	op := ""
+	np := ""
+	err := os.Rename(op, np)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("rename ok")
+	}
+}
+
+func OsCmdRm() {
+	op := fmt.Sprintf("%s%s01/", "", "201901")
+	err := os.RemoveAll(op)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("remove ok")
+	}
+}
+
+func GetParDirOnDir() {
+	fmt.Println(util.GetParDir(strings.TrimRight("", string(os.PathSeparator))))
+
+}
 
 func main() {
-
-	//run1()
-	//run2()
-	runn()
+	//OsCmdRm()
+	OsCmdRm()
 }

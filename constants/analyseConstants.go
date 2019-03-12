@@ -86,7 +86,7 @@ const (
 
 // 去重域名文件+地理
 const (
-	GeoUDDomainIndex  			int8 = iota 									// 域名位置
+	GeoUDDomainIndex  				int8 = iota 									// 域名位置
 	GeoUDV6GIndex                 												// V6地理位置
 	GeoUDV4GIndex                 												// V4地理位置
 )
@@ -94,7 +94,7 @@ const (
 
 // 去重IPv6文件+地理
 const (
-	GeoUIV6Index      			int8 = iota 									// 域名位置
+	GeoUIV6Index      				int8 = iota 									// 域名位置
 	GeoUIV6GIndex                 												// V6地理位置
 	GeoUIV4GIndex                 												// V4地理位置
 )

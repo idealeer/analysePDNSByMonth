@@ -12,12 +12,16 @@ package variables
 var DNSFileDir					string				// dns文件文件夹
 var DNSFileName					string				// 单个dns文件名
 var ZDNSExeFileName				string				// ZDNS可执行文件
+
 var ResBeforeDir				string				// 先前结果文件夹
+var RecordHisDir				string				// 历史文件保存文件夹
+
 var ApiResDir					string				// 历史api结果文件
 
 var D4FileName 					string 				// 域名v4地址字典文件
 var V6GeoFileName				string				// v6地理库
 var V4GeoFileName				string				// v4地理库
+
 //
 
 //// 合并文件

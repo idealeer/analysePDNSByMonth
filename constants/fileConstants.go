@@ -10,3 +10,6 @@ package constants
 
 const DNSFolerReg	string = `[\d]{8}`
 const DNSFileReg	string = `part-([\d]{5})`
+
+const CMDMove		string = "mv"
+const CMDRemove		string = "rm"

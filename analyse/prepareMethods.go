@@ -76,6 +76,23 @@ func PrepareBeforeResFile(fileDir string) {
 }
 
 /*
+	历史中间文件保存文件夹
+ */
+func PrepareHisRecordDir(fileDir string) {
+	fg, err := os.Stat(fileDir)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-hisRecord-dir parm]", err.Error()))
+		os.Exit(1)
+	}
+	if fg.IsDir() {		// 目录
+		variables.RecordHisDir = util.NormalFileDir(fileDir)
+	} else {			// 文件
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-hisRecord-dir parm]", err.Error()))
+		os.Exit(1)
+	}
+}
+
+/*
 	域名v4地址字典文件
  */
 func PrepareD4File(fileDir string) {
