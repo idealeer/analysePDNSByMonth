@@ -14,6 +14,7 @@ import (
 	"analysePDNSByMonth/util"
 	"analysePDNSByMonth/variables"
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -80,6 +81,8 @@ func unionDNSRecordAndIP(dnsFileName string, ipFileName string, unionFileName st
 		readedTotal = 0
 		fileLines = util.GetLines(dnsFileName)
 
+		var dnsRecordNew bytes.Buffer
+
 		dnsFile, eOOO := os.Open(dnsFileName)
 		if eOOO != nil {
 			util.LogRecord(fmt.Sprintf("Error: %s", eOOO.Error()))
@@ -104,10 +107,15 @@ func unionDNSRecordAndIP(dnsFileName string, ipFileName string, unionFileName st
 			if ipv4 == "" {				// 是否需要此时查询
 				ipv4 = "null;"
 			}
-			dnsRecordNew := dnsRecord + "\t" + ipv4
+			//dnsRecordNew := dnsRecord + "\t" + ipv4
+			dnsRecordNew.WriteString(dnsRecord)
+			dnsRecordNew.WriteByte('\t')
+			dnsRecordNew.WriteString(ipv4)
+			dnsRecordNew.WriteByte('\n')
 
 			// 写入合并后的文件
-			_, eW := outUnionFile.WriteString(dnsRecordNew + "\n")
+			_, eW := outUnionFile.WriteString(dnsRecordNew.String())
+			dnsRecordNew.Reset()
 			if eW != nil {
 				util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
 				continue

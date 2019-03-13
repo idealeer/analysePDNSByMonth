@@ -53,6 +53,7 @@ func EndReserveResAndTemp() {
 		util.LogRecord(fmt.Sprintf("move ok: %s -> %s", variables.DNSFileResDir, resBeforeDir))
 	}
 
+/*
 	//// 保存临时文件，创建临时文件夹
 	tmpDir := variables.RecordHisDir + constants.DNSTempFolder + "-" + variables.DNSDateSpec + string(os.PathSeparator)
 	_, err1 := os.Stat(tmpDir)
@@ -92,7 +93,7 @@ func EndReserveResAndTemp() {
 		}
 	}
 	util.LogRecord(fmt.Sprintf("remove ok: %s", fmt.Sprintf("%s%s%", variables.DNSFileDir, variables.DNSDateSpec)))
-
+*/
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	util.LogRecord("Ending: ")
 }

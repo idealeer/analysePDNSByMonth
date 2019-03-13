@@ -68,7 +68,7 @@ func analysePrepare(ccmd uint8) {
 func unionDNSFiles() {
 	if variables.DNSFileName == "" || util.FileIsNotExist(GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)) {		// 多个文件进行合并
 		variables.DNSFileUnionName = GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)		// 合并文件名称
-		UnionDNSFileOnDirMul(variables.DNSFileDir, variables.DNSFileUnionName)		// 并发合并文件
+		UnionDNSFileOnDir(variables.DNSFileDir, variables.DNSFileUnionName)		// 并发合并文件
 	} else if variables.DNSFileName != GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion){
 		variables.DNSFileUnionName = GetTmpFileName(constants.DNSFileUnionName, constants.DNSFileTempExtion)		// 合并文件名称
 		ReverseDomain2UnionFile(variables.DNSFileName, variables.DNSFileUnionName)		// 合并文件

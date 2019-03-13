@@ -10,6 +10,7 @@ package util
 
 import (
 	"analysePDNSByMonth/constants"
+	"bytes"
 	"fmt"
 	"strings"
 )
@@ -41,10 +42,15 @@ func GetSignifcantDomainData(data string) string {
 	reverseDomainList := strings.Split(reverseDomain, ".")
 	length := len(reverseDomainList)
 	domain := reverseDomainList[length - 1]
+
+	var resDomain bytes.Buffer
+	resDomain.WriteString(domain)
+
 	for i := length - 2; i >= 0; i-- {
-		domain = domain + "." + reverseDomainList[i]
+		resDomain.WriteByte('.')
+		resDomain.WriteString(reverseDomainList[i])
 	}
-	return domain
+	return resDomain.String()
 }
 
 /*

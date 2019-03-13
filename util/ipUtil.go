@@ -11,6 +11,7 @@ package util
 import (
 	"analysePDNSByMonth/types"
 	"analysePDNSByMonth/variables"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -118,11 +119,20 @@ func ZDNSJson2String(jsonBytes []byte) string {
 	if err != nil {
 		return "null\tnull;"
 	}
+
+	var resStr bytes.Buffer
+
 	if res.Status != "NOERROR" {
-		return fmt.Sprintf("%s\tnull;", res.Name)
+		resStr.WriteString(res.Name)
+		resStr.WriteString("\tnull;")
+		return resStr.String()
 	}
 
-	return fmt.Sprintf("%s\t%s;", res.Name, strings.Join(res.Data.IPv4Addresses, ";"))
+	resStr.WriteString(res.Name)
+	resStr.WriteByte('\t')
+	resStr.WriteString(strings.Join(res.Data.IPv4Addresses, ";"))
+
+	return resStr.String()
 }
 
 /*

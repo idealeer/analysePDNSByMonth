@@ -12,6 +12,7 @@ import (
 	"analysePDNSByMonth/util"
 	"analysePDNSByMonth/variables"
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -57,6 +58,8 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 	var readedTotal uint64 = 0
 	fileLines := util.GetLines(fileName)
 
+	var resStr bytes.Buffer
+
 	for {
 		if readedCount%variables.LogShowBigLag == 0 {
 			readedCount = 0
@@ -71,7 +74,13 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 		readedTotal++
 
 		zdnsDomainIPv4 := util.ZDNSJson2String(zdnsJsonBytes)
-		_, err = outWFile.WriteString(zdnsDomainIPv4 + "\n")
+
+		resStr.WriteString(zdnsDomainIPv4)
+		resStr.WriteByte('\n')
+
+		_, err = outWFile.WriteString(resStr.String())
+		resStr.Reset()
+
 		if err != nil {
 			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 			continue
@@ -79,7 +88,11 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 		outWFile.Flush()
 
 		if variables.D4FileName != "" {
-			_, err = outWFile4.WriteString(zdnsDomainIPv4 + "\n")
+			resStr.WriteString(zdnsDomainIPv4)
+			resStr.WriteByte('\n')
+			_, err = outWFile4.WriteString(resStr.String())
+			resStr.Reset()
+
 			if err != nil {
 				util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 				continue

@@ -47,6 +47,18 @@ func GetIPGeoByMM(ips string, mmdb *geoip2.Reader, v4Flag bool, v6Flag bool) str
 }
 
 /*
+	根据MaxMind数据库获得IP地理信息，返回示例：CN
+ */
+func GetSingleIPGeoByMM(ips string, mmdb *geoip2.Reader) string {
+	ipIP := net.ParseIP(ips)
+	record, err := mmdb.Country(ipIP)
+	if err != nil || record.Country.GeoNameID == 0 {
+		return "null"
+	}
+	return record.Country.IsoCode
+}
+
+/*
 	根据MaxMind数据库获得IP地理信息，返回示例：中国大陆;China;CN;00001
  */
 func GetIPGeosPercentByMM(ips string, mmdb *geoip2.Reader, v4Flag bool, v6Flag bool) float64 {

@@ -14,6 +14,7 @@ import (
 	"analysePDNSByMonth/util"
 	"analysePDNSByMonth/variables"
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -56,7 +57,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 		var ip4GeoMap = make(types.TPMSS, constants.MapAllocLen)
 		var ip6GeoMap = make(types.TPMSS, constants.MapAllocLen)
 
-		// 初始化ip地理字典
+		// 初始化ipv4地理字典
 		if variables.V4GeoFileName != "" {
 			ipFile, eO := os.Open(variables.V4GeoFileName)
 			if eO != nil {
@@ -84,12 +85,14 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 					ip4GeoMap[ip] = ipGeoList[1]
 				}
 			}
-			util.LogRecord(fmt.Sprintf("Create IPv4GeoMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+			util.LogRecord(fmt.Sprintf("create IPv4GeoMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+			util.LogRecord(fmt.Sprintf("create IPv4GeoMap, total: %d, cost: %ds", fileLines, time.Now().Sub(timeNow)/time.Second))
 		}
 
 		readedCount = 0
 		readedTotal = 0
 
+		// 初始化ipv6地理字典
 		if variables.V6GeoFileName != "" {
 			ipFile, eO := os.Open(variables.V6GeoFileName)
 			if eO != nil {
@@ -117,16 +120,21 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 					ip6GeoMap[ip] = ipGeoList[1]
 				}
 			}
-			util.LogRecord(fmt.Sprintf("Create IPv6GeoMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+			util.LogRecord(fmt.Sprintf("create IPv6GeoMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+			util.LogRecord(fmt.Sprintf("create IPv6GeoMap, total: %d, cost: %ds", fileLines, time.Now().Sub(timeNow)/time.Second))
+
 		}
 
 		// 遍历查询地理
 		readedTotal = 0
 		readedCount = 0
 		fileLines := util.GetLines(dnsRCDFileName)
+
 		// ip对应国家字典-new
 		var ip4GeoMapNew = make(types.TPMSS, constants.MapAllocLen)
 		var ip6GeoMapNew = make(types.TPMSS, constants.MapAllocLen)
+
+		var dnsRecordNew bytes.Buffer
 
 		for {
 			if readedCount%variables.LogShowBigLag == 0 {
@@ -153,7 +161,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 
 			if _, ok := ip4GeoMap[ipv4]; !ok {
 				if _, ok := ip4GeoMapNew[ipv4]; !ok {
-					dnsRecordIPv4Geo = util.GetIPGeoByMM(ipv4, variables.MaxMindReader, constants.IPv4Geo, constants.NoIPv6Geo)
+					dnsRecordIPv4Geo = util.GetSingleIPGeoByMM(ipv4, variables.MaxMindReader)
 					ip4GeoMapNew[ipv4] = dnsRecordIPv4Geo
 				} else {
 					dnsRecordIPv4Geo = ip4GeoMapNew[ipv4]
@@ -164,7 +172,7 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 
 			if _, ok := ip6GeoMap[ipv6]; !ok {
 				if _, ok := ip6GeoMapNew[ipv6]; !ok {
-					dnsRecordIPv6Geo = util.GetIPGeoByMM(ipv6, variables.MaxMindReader, constants.NoIPv4Geo, constants.IPv6Geo)
+					dnsRecordIPv6Geo = util.GetSingleIPGeoByMM(ipv6, variables.MaxMindReader)
 					ip6GeoMapNew[ipv6] = dnsRecordIPv6Geo
 				} else {
 					dnsRecordIPv6Geo = ip6GeoMapNew[ipv6]
@@ -173,10 +181,19 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 				dnsRecordIPv6Geo = ip6GeoMap[ipv6]
 			}
 
-			dnsRecordNew := dnsRecord + "\t" + dnsRecordIPv6Geo + "\t" + dnsRecordIPv4Geo
+			//dnsRecordNew := dnsRecord + "\t" + dnsRecordIPv6Geo + "\t" + dnsRecordIPv4Geo
+
+			dnsRecordNew.WriteString(dnsRecord)
+			dnsRecordNew.WriteByte('\t')
+			dnsRecordNew.WriteString(dnsRecordIPv6Geo)
+			dnsRecordNew.WriteByte('\t')
+			dnsRecordNew.WriteString(dnsRecordIPv4Geo)
+			dnsRecordNew.WriteByte('\n')
 
 			// 保存添加v6+v4地理信息的记录
-			_, eW := outDNSGeoFile.WriteString(dnsRecordNew + "\n")
+			_, eW := outDNSGeoFile.WriteString(dnsRecordNew.String())
+			dnsRecordNew.Reset()
+
 			if eW != nil {
 				util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
 				os.Exit(1)
@@ -198,7 +215,15 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 			outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
 			for ip, _ := range ip4GeoMapNew {
 				readedCount ++
-				_, err = outWFile.WriteString(ip + "\t" + ip4GeoMapNew[ip] + "\n")
+
+				dnsRecordNew.WriteString(ip)
+				dnsRecordNew.WriteByte('\t')
+				dnsRecordNew.WriteString(ip4GeoMapNew[ip])
+				dnsRecordNew.WriteByte('\n')
+
+				_, err = outWFile.WriteString(dnsRecordNew.String())
+				dnsRecordNew.Reset()
+
 				if err != nil {
 					util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 					continue
@@ -220,7 +245,15 @@ func getV6V4Geo(dnsRCDFileName string, dnsRCDV6GeoV4GeoFileName string) {
 			outWFile6 := bufio.NewWriter(fw6) // 创建新的 Writer 对象
 			for ip, _ := range ip6GeoMapNew {
 				readedCount ++
-				_, err6 = outWFile6.WriteString(ip + "\t" + ip6GeoMapNew[ip] + "\n")
+
+				dnsRecordNew.WriteString(ip)
+				dnsRecordNew.WriteByte('\t')
+				dnsRecordNew.WriteString(ip6GeoMapNew[ip])
+				dnsRecordNew.WriteByte('\n')
+
+				_, err6 = outWFile6.WriteString(dnsRecordNew.String())
+				dnsRecordNew.Reset()
+
 				if err6 != nil {
 					util.LogRecord(fmt.Sprintf("Error: %s", err6.Error()))
 					continue
@@ -275,6 +308,8 @@ func getGeoByFile(ipFileName string, ipGeoFileName string) {
 	var readedTotal uint64 = 0
 	fileLines := util.GetLines(ipFileName)
 
+	var dnsRecordNew bytes.Buffer
+
 	for {
 		if readedCount%variables.LogShowBigLag == 0 {
 			readedCount = 0
@@ -287,15 +322,22 @@ func getGeoByFile(ipFileName string, ipGeoFileName string) {
 		readedCount++
 		readedTotal++
 		ip := string(ipBytes)
-		ip = strings.TrimRight(ip, ";")
-		ipGeo := "null;null;null;null"
+		ip = strings.TrimRight(ip, "\n")
+		ipGeo := "null"
 		if ip != "null" {
-			ipGeo = util.GetIPGeoByMM(ip, variables.MaxMindReader, constants.IPv4Geo, constants.IPv6Geo)
+			ipGeo = util.GetSingleIPGeoByMM(ip, variables.MaxMindReader)
 		}
-		dnsRecordNew := ip + "\t" + ipGeo
+		//dnsRecordNew := ip + "\t" + ipGeo
+
+		dnsRecordNew.WriteString(ip)
+		dnsRecordNew.WriteByte('\t')
+		dnsRecordNew.WriteString(ipGeo)
+		dnsRecordNew.WriteByte('\n')
 
 		// 保存添加IP地理信息的记录
-		_, eW := outDNSGeoFile.WriteString(dnsRecordNew + "\n")
+		_, eW := outDNSGeoFile.WriteString(dnsRecordNew.String())
+		dnsRecordNew.Reset()
+
 		if eW != nil {
 			util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
 			os.Exit(1)

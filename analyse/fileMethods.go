@@ -13,6 +13,7 @@ import (
 	"analysePDNSByMonth/util"
 	"analysePDNSByMonth/variables"
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -82,6 +83,8 @@ func unionDNSFile(fileName string, outWFile *bufio.Writer) {
 	var readedCount uint64 = 0
 	var readedTotal uint64 = 0
 
+	var dnsRecordNew bytes.Buffer
+
 	for {
 		if readedCount % variables.LogShowBigLag == 0 {
 			readedCount = 0
@@ -100,17 +103,27 @@ func unionDNSFile(fileName string, outWFile *bufio.Writer) {
 			util.LogRecord(fmt.Sprintf("Error record in %s: %s", fileName, lineString))
 			continue
 		}
-		dnsRecordCount := util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
 		dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
-		dnsRecordIPv6 := util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
-		dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
+		dnsRecordCount := dnsRecordList[constants.OCountIndex]	// util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
+		dnsRecordIPv6 := dnsRecordList[constants.OIPv6Index]	// util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
+		//dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
 
-		_, err = outWFile.WriteString(dnsRecordNew + "\n")
+		dnsRecordNew.WriteString(dnsRecordDomain)
+		dnsRecordNew.WriteByte('\t')
+		dnsRecordNew.WriteString(dnsRecordCount)
+		dnsRecordNew.WriteByte('\t')
+		dnsRecordNew.WriteString(dnsRecordIPv6)
+		dnsRecordNew.WriteByte('\n')
+
+		_, err = outWFile.WriteString(dnsRecordNew.String())
+		dnsRecordNew.Reset()
+
 		if err != nil {
 			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 			continue
 		}
 		outWFile.Flush()
+
 	}
 
 	//LogRecord(fmt.Sprintf("readedtotal: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow) / time.Second))
@@ -198,6 +211,8 @@ func ReverseDomain2UnionFile(fileName string, fileNameNew string) {
 		var readedCount uint64 = 0
 		var readedTotal uint64 = 0
 
+		var dnsRecordNew bytes.Buffer
+
 		for {
 			if readedCount % variables.LogShowBigLag == 0 {
 				readedCount = 0
@@ -212,17 +227,27 @@ func ReverseDomain2UnionFile(fileName string, fileNameNew string) {
 
 			lineString := string(lineBytes)
 			dnsRecordList := strings.Split(lineString, "\t")
-			dnsRecordCount := util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
+			dnsRecordCount := dnsRecordList[constants.OCountIndex]	// util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
 			dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
-			dnsRecordIPv6 := util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
-			dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
+			dnsRecordIPv6 := dnsRecordList[constants.OIPv6Index]	// util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
+			//dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
 
-			_, err = outWFile.WriteString(dnsRecordNew + "\n")
+			dnsRecordNew.WriteString(dnsRecordDomain)
+			dnsRecordNew.WriteByte('\t')
+			dnsRecordNew.WriteString(dnsRecordCount)
+			dnsRecordNew.WriteByte('\t')
+			dnsRecordNew.WriteString(dnsRecordIPv6)
+			dnsRecordNew.WriteByte('\n')
+
+			_, err = outWFile.WriteString(dnsRecordNew.String())
+			dnsRecordNew.Reset()
+
 			if err != nil {
 				util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 				continue
 			}
 			outWFile.Flush()
+
 		}
 
 
@@ -261,6 +286,8 @@ func unionDNSFileMul(fileName string, fileNameNew string, res chan<- string) {
 	}
 	outWFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
 
+	var dnsRecordNew bytes.Buffer
+
 	for {
 		if readedCount % variables.LogShowBigLag == 0 {
 			readedCount = 0
@@ -279,17 +306,28 @@ func unionDNSFileMul(fileName string, fileNameNew string, res chan<- string) {
 			util.LogRecord(fmt.Sprintf("Error record in %s: %s", fileName, lineString))
 			continue
 		}
-		dnsRecordCount := util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
-		dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
-		dnsRecordIPv6 := util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
-		dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
 
-		_, err = outWFile.WriteString(dnsRecordNew + "\n")
+		dnsRecordDomain := util.GetSignifcantDomainData(dnsRecordList[constants.ODomainIndex])
+		dnsRecordCount := dnsRecordList[constants.OCountIndex]	// util.GetSignifcantCountData(dnsRecordList[constants.OCountIndex])
+		dnsRecordIPv6 := dnsRecordList[constants.OIPv6Index]	// util.GetSignifcantIPv6Data(dnsRecordList[constants.OIPv6Index])
+		//dnsRecordNew := fmt.Sprintf("%s\t%s\t%s", dnsRecordDomain, dnsRecordCount, dnsRecordIPv6)
+
+		dnsRecordNew.WriteString(dnsRecordDomain)
+		dnsRecordNew.WriteByte('\t')
+		dnsRecordNew.WriteString(dnsRecordCount)
+		dnsRecordNew.WriteByte('\t')
+		dnsRecordNew.WriteString(dnsRecordIPv6)
+		dnsRecordNew.WriteByte('\n')
+
+		_, err = outWFile.WriteString(dnsRecordNew.String())
+		dnsRecordNew.Reset()
+
 		if err != nil {
 			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 			continue
 		}
 		outWFile.Flush()
+
 	}
 
 	res <- fileName

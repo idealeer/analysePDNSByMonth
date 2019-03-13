@@ -22,6 +22,8 @@ type TPMSI64 map[string]int64     			// 自定义类型：map[string]int64
 type TPMSTPMSI64 map[string]TPMSI64 		// 自定义类型：map[string](map[string]int64)
 type TPMSTPMSTPMSI64 map[string]TPMSTPMSI64	// 自定义类型：map[string](map[string](map[string]int64))
 
+type TPMSB	map[string]bool
+
 type TC struct {
 	TLD   string							`json:"tld,omitempty"`
 	Count int64								`json:"count,omitempty"`
