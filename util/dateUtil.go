@@ -24,6 +24,29 @@ func TS2YearAndMonth(ts int64) (year int, month int) {
 }
 
 /*
+	总月份个数
+ */
+func GetMonthNums(sym string, eym string) int64 {
+	dateInt, _:= strconv.Atoi(sym)
+	dateEndInt, _:= strconv.Atoi(eym)
+	sy := dateInt / 100
+	sm := dateInt % 100
+	ey := dateEndInt / 100
+	em := dateEndInt % 100
+	return int64((ey - sy) * 12 - sm + em + 1)
+}
+
+/*
+	中文月份
+ */
+func GetChineseMonth(ym string) string {
+	dateInt, _:= strconv.Atoi(ym)
+	sy := dateInt / 100
+	sm := dateInt % 100
+	return fmt.Sprintf("%d年%d月", sy, sm)
+}
+
+/*
 	获得指定年月间的年月表，通过指定年月区间，包括截止月
  */
 func GetSpecYMsByYM(sy int, sm int, ey int, em int) ([]string, int) {

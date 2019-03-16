@@ -22,6 +22,9 @@ var D4FileName 					string 				// 域名v4地址字典文件
 var V6GeoFileName				string				// v6地理库
 var V4GeoFileName				string				// v4地理库
 
+var ResFileName					string				// 存储结果文件
+
+
 //
 
 //// 合并文件

@@ -61,9 +61,10 @@ func unionDNSRecordAndIP(dnsFileName string, ipFileName string, unionFileName st
 			domainIP := string(domainIPBytes)
 			domainIPList := strings.Split(domainIP, "\t")
 			domain = domainIPList[constants.UDomainIndex]
-			if _, ok := domainIPMap[domain]; !ok {
-				domainIPMap[domain] = domainIPList[constants.UIPv4Index]
-			}
+			//if _, ok := domainIPMap[domain]; !ok {
+			// 已经是去重的
+			domainIPMap[domain] = domainIPList[constants.UIPv4Index]
+			//}
 		}
 		util.LogRecord(fmt.Sprintf("Create DomainIPMap, remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
 

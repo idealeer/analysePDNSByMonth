@@ -21,3 +21,5 @@ var LogWriter		*os.File	// 日志输出流
 var LogShowLev		int8		// 日志等级，不可初始化
 var LogShowBigLag	uint64
 var LogShowSmlLag	uint64
+
+var ResWriter		*os.File	// 结果输出流

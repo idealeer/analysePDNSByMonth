@@ -38,8 +38,9 @@ func GetSignifcantCountData(data string) string {
 	获取有用的DNS-Domain字段值
  */
 func GetSignifcantDomainData(data string) string {
-	reverseDomain := strings.Split(strings.Split(data, ":")[constants.DataIndex], "+")[constants.DomainIndex]
-	reverseDomainList := strings.Split(reverseDomain, ".")
+	//reverseDomain := strings.Split(strings.Split(data, ":")[constants.DataIndex], "+")[constants.DomainIndex]
+
+	reverseDomainList := strings.Split(data, ".")
 	length := len(reverseDomainList)
 	domain := reverseDomainList[length - 1]
 

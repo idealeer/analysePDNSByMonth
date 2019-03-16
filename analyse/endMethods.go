@@ -28,6 +28,15 @@ func EndLog() {
 }
 
 /*
+	结果文件收尾
+ */
+func EndSimpleLog() {
+	if variables.ResWriter != nil {
+		variables.ResWriter.Close()
+	}
+}
+
+/*
 	MaxMind收尾
  */
 func EndMaxMind() {
@@ -43,6 +52,7 @@ func EndReserveResAndTemp() {
 	timeNow := time.Now()
 	util.LogRecord("Excuting:")
 
+
 	// 保存结果文件
 	resBeforeDir := util.GetParDir(strings.TrimRight(variables.ResBeforeDir, string(os.PathSeparator))) + constants.DNSResFolder + "-" + variables.DNSDateSpec
 	err := os.Rename(variables.DNSFileResDir, resBeforeDir)
@@ -53,7 +63,6 @@ func EndReserveResAndTemp() {
 		util.LogRecord(fmt.Sprintf("move ok: %s -> %s", variables.DNSFileResDir, resBeforeDir))
 	}
 
-/*
 	//// 保存临时文件，创建临时文件夹
 	tmpDir := variables.RecordHisDir + constants.DNSTempFolder + "-" + variables.DNSDateSpec + string(os.PathSeparator)
 	_, err1 := os.Stat(tmpDir)
@@ -93,7 +102,7 @@ func EndReserveResAndTemp() {
 		}
 	}
 	util.LogRecord(fmt.Sprintf("remove ok: %s", fmt.Sprintf("%s%s%", variables.DNSFileDir, variables.DNSDateSpec)))
-*/
+
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	util.LogRecord("Ending: ")
 }

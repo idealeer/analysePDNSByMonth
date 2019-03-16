@@ -35,6 +35,9 @@ const DNSFileV4GeoUniqSLD 		string = "GeoV4UniqSLD"            				// 地理去�
 const RecordStartIndex			int8 = 0										// 字段起始位置
 const DataIndex					int = 0											// 每个字段数据的有效位置
 const DomainIndex				int = 0											// 域名的有效位置
+
+const DataSigLen				int = 3											// 有效数据个数
+
 // 原始记录文件
 const (
 	ODomainIndex				int8 = iota	+ RecordStartIndex					// 域名位置
@@ -175,6 +178,8 @@ const (
 	CmdApi2Json																	// api结果转json
 
 	CmdAnalyseMul																// 分析多个相邻月份
+
+	CmdAnaRes																	// 分析统计结果
 
 	CmdDefault
 )

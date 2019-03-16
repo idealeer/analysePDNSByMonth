@@ -15,9 +15,9 @@ import (
 	"fmt"
 	"github.com/miekg/dns"
 	"github.com/oschwald/geoip2-golang"
-	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -90,6 +90,72 @@ func PrepareHisRecordDir(fileDir string) {
 		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-hisRecord-dir parm]", err.Error()))
 		os.Exit(1)
 	}
+}
+
+/*
+	日志准备
+ */
+func PrepareSimpleLog() {
+	variables.ResFileName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.ResFileName, constants.DateFormat)), constants.LogExtion)
+	fw, err := os.OpenFile(variables.ResFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755) // 打开或创建文件
+	variables.ResWriter = fw
+	//defer variables.LogWriter.Close()	// 不能关闭
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+		os.Exit(1)
+	}
+}
+
+/*
+	分析结果
+ */
+func PrepareAnaRes(fileDir string, cnp int, cnz int, ctys string) {
+	// iso中文国家名文件
+	fg, err := os.Stat(fileDir)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-iso-dir parm]", err.Error()))
+		os.Exit(1)
+	}
+	if fg.IsDir() {		// 目录
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-iso-dir parm]", err.Error()))
+		os.Exit(1)
+	} else {			// 文件
+		variables.IsoCNNameFile = fileDir
+	}
+	// 中国人口数量
+	if cnp < 0 {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-cnp parm]", err.Error()))
+		os.Exit(1)
+	} else {
+		variables.CPLNum = int64(cnp) * constants.YYTimes
+	}
+	// 中国网民数量
+	if cnz < 0 {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-cnz parm]", err.Error()))
+		os.Exit(1)
+	} else {
+		variables.CNZNum = int64(cnz) * constants.YYTimes
+	}
+
+	util.GetISOCNMap(variables.IsoCNNameFile)
+
+	// 国家列表
+	if ctys == "" {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ctys parm]", err.Error()))
+		os.Exit(1)
+	} else {
+		ctyList := strings.Split(ctys, ",")
+		for _, cty := range ctyList {
+			if _, ok := variables.IsoCNNameMap[cty]; !ok && cty != constants.TotalTimesString {
+				util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ctys parm], not %s", err.Error(), cty))
+				os.Exit(1)
+			}
+		}
+		variables.Countrys = ctys
+	}
+
+	variables.TotalMonthNum = util.GetMonthNums(variables.DNSDateBefore, variables.DNSDateSpec)
+	variables.TotalDayNum = variables.TotalMonthNum * 30
 }
 
 /*
@@ -182,7 +248,6 @@ func PrepareLog(logShow bool, logFile bool, logShowLev int8) {
 			fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
 			os.Exit(1)
 		}
-		log.SetFlags(log.Ldate|log.Ltime)
 	}
 }
 

@@ -99,7 +99,7 @@ func unionDNSFile(fileName string, outWFile *bufio.Writer) {
 
 		lineString := string(lineBytes)
 		dnsRecordList := strings.Split(lineString, "\t")
-		if len(dnsRecordList) != 3 {
+		if len(dnsRecordList) != constants.DataSigLen {
 			util.LogRecord(fmt.Sprintf("Error record in %s: %s", fileName, lineString))
 			continue
 		}

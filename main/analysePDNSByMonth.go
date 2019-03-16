@@ -14,6 +14,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -46,6 +47,10 @@ var (
 	v4GeoFile		string	// v4地理库
 	v6GeoFile		string	// v6地理库
 	hisRecordDir	string  // 历史结果保存文件夹
+	cnPlNum			int		// 中国总人口(单位:亿)
+	cnNzNum			int		// 中国网民数量(单位:亿)
+	ctyList			string	// 分析结果的国家列表(,分隔)
+	isoCNNameFile	string	// iso对应中文国家名文件
 )
 
 func init() {
@@ -57,6 +62,9 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CmdNS, "查询IPv4地址")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdTest, "测试")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdApi2Json, "API结果转Json")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdAnalyseMul, "统计多个月份数据")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdAnaRes, "分析结果文件")+
+
 			fmt.Sprintf("%d\t%s", constants.CmdDefault, "什么也没做(默认)"))
 
 	// 二级命令
@@ -167,6 +175,18 @@ func init() {
 	flag.StringVar(&hisRecordDir, "hisRecord-dir", "",
 		fmt.Sprintf("%s", "历史中间结果保存文件夹"))
 
+	flag.IntVar(&cnPlNum, "cnp", 14,
+		fmt.Sprintf("中国总人口(单位:亿)"))
+
+	flag.IntVar(&cnNzNum, "cnn", 8,
+		fmt.Sprintf("中国网民(单位:亿)"))
+
+	flag.StringVar(&ctyList, "ctys", "total,CN,US",
+		fmt.Sprintf("%s", "分析国家列表(,分隔)"))
+
+	flag.StringVar(&isoCNNameFile, "iso-dir", "",
+		fmt.Sprintf("%s", "ISO对应中文国家名文件"))
+
 	flag.Usage = usage // 改变默认的usage
 }
 
@@ -214,14 +234,21 @@ func main() {
 		analyse.PrepareAPIResFile(apiResDir)
 		//analyse.PrepareDate(date, dateBefore)
 		analyse.ApiRes2JsonRes()
+	case constants.CmdAnaRes:
+		analyse.PrepareAnaRes(isoCNNameFile, cnPlNum, cnNzNum, ctyList)
+		analyse.PrepareD4File(d4File)
+		analyse.PrepareV46GeoFile(v4GeoFile, v6GeoFile)
+		analyse.PrepareSimpleLog()
+		analyse.AnalyseResult()
+		analyse.EndSimpleLog()
 	case constants.CmdAnalyseMul:
 
-		timeNow1 := time.Now()
 
 		var mList = make([]string, 0)
 		mList = analyse.PrepareOrder(inc, dec)
 
 		for _, ym := range mList {
+			timeNow1 := time.Now()
 			util.LogRecord("Excuting: " + ym)
 
 			analyse.PrepareDate(ym, dateBefore, dateEnd)
@@ -246,6 +273,11 @@ func main() {
 			if ym != mList[len(mList) - 1] {
 				analyse.EndLog()
 			}
+
+			if ym == mList[len(mList) - 1] {
+				util.LogRecord(strings.Join(mList, ", "))
+			}
+
 		}
 
 	default:

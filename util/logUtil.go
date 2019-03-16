@@ -37,6 +37,7 @@ func GetNowFuncInfo() string {
 	日志记录
  */
 func LogRecord(info string) {
+	log.SetFlags(log.Ldate|log.Ltime)
 	if variables.LogShow {
 		log.SetOutput(os.Stdout)
 		log.Printf(GetNowFuncInfo() + "\t" + info)
@@ -44,5 +45,16 @@ func LogRecord(info string) {
 	if variables.LogFile {
 		log.SetOutput(variables.LogWriter)
 		log.Printf(GetNowFuncInfo() + "\t" + info)
+	}
+}
+
+/*
+	日志记录
+ */
+func LogRecordSimple(info string) {
+	log.SetFlags(0)
+	if variables.LogFile {
+		log.SetOutput(variables.ResWriter)
+		log.Printf(info)
 	}
 }

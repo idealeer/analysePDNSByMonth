@@ -10,10 +10,17 @@ package util
 
 import (
 	"analysePDNSByMonth/constants"
+	"analysePDNSByMonth/types"
+	"analysePDNSByMonth/variables"
+	"bufio"
+	"fmt"
 	"github.com/oschwald/geoip2-golang"
+	"io"
 	"net"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 /*
@@ -93,3 +100,47 @@ func GetIPGeosPercentByMM(ips string, mmdb *geoip2.Reader, v4Flag bool, v6Flag b
 		return float64(geoMap[firstGeo]) / float64(total)
 	}
 }
+
+/*
+	构建简称、中文国家名字典
+ */
+func GetISOCNMap(fileName string) {
+	timeNow := time.Now()
+	LogRecord("Excuting: " + fileName)
+
+	srcFile, err := os.Open(fileName)
+	if err != nil {
+		LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+		os.Exit(1)
+	}
+	defer srcFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+	br := bufio.NewReader(srcFile)
+
+	variables.IsoCNNameMap = make(types.TPMSS, 200)
+
+	for {
+		geoInfoBytes, _, e := br.ReadLine()
+		if e == io.EOF {
+			break
+		}
+		geoInfo := string(geoInfoBytes)
+		geoInfoList := strings.Split(geoInfo, "\t")
+		iso := geoInfoList[constants.ISOIndex]
+		cn := strings.Trim(geoInfoList[constants.CNNameIndex], "\"")
+		//if _, ok := geoMap[iso]; !ok {
+		if cn == "中国" {
+			cn = "中国大陆"
+		}
+		if cn == "香港" || cn == "台湾" || cn == "澳门" {
+			cn = "中国" + cn
+		}
+		variables.IsoCNNameMap[iso] = cn
+		//}
+	}
+
+	variables.IsoCNNameMap[constants.TotalTimesString] = ""
+
+	LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
+	LogRecord("Ending: " + fileName)
+}
+

@@ -15,3 +15,9 @@ const MMCNNameIndex		int8 = 0		// 中文名称位置
 const MMENNameIndex 	int8 = 1		// 英文名称位置
 const MMCodeIndex		int8 = 2		// ISO-Code位置
 const MMIDIndex 		int8 = 3		// Name-ID位置
+
+// iso、中文国家名文件
+const (
+	ISOIndex			int8 = iota
+	CNNameIndex
+)

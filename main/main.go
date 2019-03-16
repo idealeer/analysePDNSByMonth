@@ -10,8 +10,10 @@ package main
 
 import (
 	"analysePDNSByMonth/util"
+	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -211,6 +213,7 @@ func TestUnionString() {
 	d := t1.Sub(t0)
 	fmt.Printf("time %v\n", d)
 	fmt.Println(buf.String())
+	buf.Reset()
 
 
 	t0 = time.Now()
@@ -223,6 +226,55 @@ func TestUnionString() {
 	fmt.Println(s)
 }
 
+func Test201811China(fileName string) {
+	timeNow := time.Now()
+
+	srcFile, err := os.Open(fileName)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
+	defer srcFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+	br := bufio.NewReader(srcFile)
+
+	var readedCount uint64 = 0
+	var readedTotal uint64 = 0
+
+	var domainMap = make(map[string]string)
+	totalChinaGeoUD := 0
+	totalTimes := 0
+
+	for {
+		if readedCount%1000000 == 0 {
+			readedCount = 0
+			fmt.Printf("readed: %d, cost: %ds\n", readedTotal, time.Now().Sub(timeNow)/time.Second)
+		}
+		dnsRecordBytes, _, e := br.ReadLine()
+		if e == io.EOF {
+			break
+		}
+		readedCount++
+		readedTotal++
+		dnsRecord := string(dnsRecordBytes)
+		dnsRecordList := strings.Split(dnsRecord, "\t")
+		dnsRecordDomain := dnsRecordList[0]
+		times, _ := strconv.Atoi(dnsRecordList[1])
+		geo := dnsRecordList[4]
+		if geo == "CN" {
+			if _, ok := domainMap[dnsRecordDomain]; !ok {
+				domainMap[dnsRecordDomain] = ""
+				totalChinaGeoUD ++
+			}
+			totalTimes += times
+		}
+	}
+	fmt.Printf("total: %d, cost: %ds\n", readedTotal, time.Now().Sub(timeNow)/time.Second)
+	fmt.Printf("total China uniqDomain: %d, cost: %ds\n", totalChinaGeoUD, time.Now().Sub(timeNow)/time.Second)
+	fmt.Printf("total China times: %d, cost: %ds\n", totalTimes, time.Now().Sub(timeNow)/time.Second)
+
+}
+
 func main() {
-	TestUnionString()
+	s := `你好"%s"，共%d次。`
+	fmt.Printf(s, "2018年1月", 100)
 }

@@ -176,9 +176,9 @@ func uniqueDomainNoOpt(fileName string, fileNameNew string, d4FileName string) {
 }
 
 /*
-	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询
+	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询，去重时判断是否查询，内存4.5-5G
  */
-func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
+func uniqueDomain1(fileName string, fileNameNew string, d4FileName string) {
 	timeNow := time.Now()
 	util.LogRecord("Excuting: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
 
@@ -245,14 +245,12 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 			outD4File = bufio.NewWriter(d4File)
 		}
 
-		fmt.Println("domainIPMap-Len: ", len(domainIPMap))
-
 		// 去除重复域名
 		readedCount = 0
 		readedTotal = 0
 		fileLines = util.GetLines(fileName)
-		var domainMap = make(types.TPMSS, constants.MapAllocLen)
-		var domainPutMap = make(types.TPMSB, fileLines)				// 是否已经输出
+		var domainMap = make(types.TPMSS, constants.MapAllocLen / 10 * 4)			// 需要查询的
+		var domainPutMap = make(types.TPMSB, constants.MapAllocLen / 10 * 8)		// 是否已经输出到uniqDomainIPv4
 		var existedD4Count uint64 = 0
 
 		var resStr bytes.Buffer
@@ -351,9 +349,9 @@ func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 }
 
 /*
-	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询，先去重后判断是否查询，等于两个Map
+	去除重复域名，同时查询域名v4地址库，存在的不需要再次查询，先去重后判断是否查询，速度快、内存小3-3.5G
  */
-func uniqueDomain1(fileName string, fileNameNew string, d4FileName string) {
+func uniqueDomain(fileName string, fileNameNew string, d4FileName string) {
 	timeNow := time.Now()
 	util.LogRecord("Excuting: " +  fileName + " & " + variables.D4FileName + " -> " + fileNameNew + " & " + d4FileName)
 
@@ -370,7 +368,7 @@ func uniqueDomain1(fileName string, fileNameNew string, d4FileName string) {
 		var readedTotal uint64 = 0
 		fileLines := util.GetLines(fileName)
 
-		var domainMap = make(types.TPMSS, fileLines)
+		var domainMap = make(types.TPMSS, constants.MapAllocLen)
 
 		var resStr bytes.Buffer
 
