@@ -9,9 +9,11 @@
 package main
 
 import (
+	"analysePDNSByMonth/types"
 	"analysePDNSByMonth/util"
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -275,6 +277,9 @@ func Test201811China(fileName string) {
 }
 
 func main() {
-	s := `你好"%s"，共%d次。`
-	fmt.Printf(s, "2018年1月", 100)
+	var l = make(types.DCList, 0)
+	l = append(l, types.DC{"360.net", 100})
+	lb, _ := json.Marshal(l)
+
+	fmt.Println(string(lb))
 }

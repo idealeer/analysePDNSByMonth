@@ -56,6 +56,37 @@ func PrepareFileDir(fileDir string) {
 			os.Exit(1)
 		}
 	}
+	// 创建展示文件夹
+	variables.IPv6TrendFolderName = variables.DNSFileResDir + constants.IPv6TrendFolderName + "-" + variables.DNSDateSpec + string(os.PathSeparator)
+	fg, err = os.Stat(variables.IPv6TrendFolderName)
+	if err != nil {
+		ec := os.Mkdir(variables.IPv6TrendFolderName, os.ModePerm)
+		if ec != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
+			os.Exit(1)
+		}
+	}
+	// 创建v4展示文件夹
+	variables.ShowV4FolderName = variables.IPv6TrendFolderName + constants.ShowV4FolderName + string(os.PathSeparator)
+	fg, err = os.Stat(variables.ShowV4FolderName)
+	if err != nil {
+		ec := os.Mkdir(variables.ShowV4FolderName, os.ModePerm)
+		if ec != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
+			os.Exit(1)
+		}
+	}
+	// 创建v6展示文件夹
+	variables.ShowV6FolderName = variables.IPv6TrendFolderName + constants.ShowV6FolderName + string(os.PathSeparator)
+	fg, err = os.Stat(variables.ShowV6FolderName)
+	if err != nil {
+		ec := os.Mkdir(variables.ShowV6FolderName, os.ModePerm)
+		if ec != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
+			os.Exit(1)
+		}
+	}
+
 }
 
 /*

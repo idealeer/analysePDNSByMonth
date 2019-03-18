@@ -21,10 +21,10 @@ const ResStrDomainAlive		string = `域名活跃总量达%d万个，平均每月�
 const ResStrSLDAlive		string = `SLD活跃总量达%d万个，平均每月份活跃量为%d个。单月活跃量，最多为%s的%d个，最少为%s的%d个。`
 
 // SLD请求次数
-const ResStrSLDTimes		string = `在%s，Top50的SLD的请求总次数达%d亿余次，平均每天%d亿余次，最多的为访问“%s”的%d亿余次，访问排名50的“%s”也有%d万余次`
+const ResStrSLDTimes		string = `在%s，Top50的SLD的请求总次数达%d亿余次，平均每天%d亿余次，最多的为访问“%s”的%d亿余次，访问排名50的“%s”也有%d万余次。`
 
 // TLD请求次数
-const ResStrTLDTimes		string = `在%s，Top50的TLD的请求次数达%d亿余次，平均每天%d亿余次，最多的为访问“%s”的%d亿余次，访问排名50的“%s”也有%d万余次`
+const ResStrTLDTimes		string = `在%s，Top50的TLD的请求次数达%d亿余次，平均每天%d亿余次，最多的为访问“%s”的%d亿余次，访问排名50的“%s”也有%d万余次。`
 
 // IPv6地址、域名数量
 const ResStrIPv6Times		string = `IPv6地址总数量达%d万，其中，`
@@ -32,3 +32,20 @@ const ResStrDomainTimes		string = `域名总数量达%d万，其中，`
 const ResStrCTimes			string = `位于%s的有%d万，`
 
 const ResFileName			string = "PDNS分析结果"
+
+//// 展示结果
+
+const IPv6TrendFolderName	string = "ipv6trend" 		// 结果文件夹
+const ShowV4FolderName 		string = "v4"              	// v4结果文件夹
+const ShowV6FolderName 		string = "v6"              	// v6结果文件夹
+
+const ShowFileExtion		string = "txt"								// 文件后缀
+
+const ShowDomainFName		string = "active_domain_by_area"			// 活跃域名
+const ShowIPv6FName			string = "active_ipv6_by_area"				// 活跃IPv6
+const ShowSLDFName			string = "active_sld_by_area"				// 活跃SLD
+const ShowDNSTimes			string = "seen_by_country"					// DNS请求次数
+
+const TopNSLD				string = "top_50_sld_by_area"				// topN-SLD
+const TopNSLDTotal			string = "top_sld_seen"						// topN-SLD-Total
+const TopNTLD				string = "top_tld_seen"						// topN-TLD

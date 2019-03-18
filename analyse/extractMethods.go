@@ -73,7 +73,7 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 		readedCount++
 		readedTotal++
 
-		zdnsDomainIPv4 := util.ZDNSJson2String(zdnsJsonBytes)
+		zdnsDomainIPv4 := util.ZDNSALookUpJson2String(zdnsJsonBytes)
 
 		resStr.WriteString(zdnsDomainIPv4)
 		resStr.WriteByte('\n')

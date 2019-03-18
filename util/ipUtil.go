@@ -108,7 +108,7 @@ func DNSLookUpIP(host string) string {
 	return ipStr
 }
 
-func ZDNSJson2String(jsonBytes []byte) string {
+func ZDNSALookUpJson2String(jsonBytes []byte) string {
 	if string(jsonBytes) == "" {
 		return ""
 	}
@@ -157,5 +157,5 @@ func ZDNSLookUp(exe string, argu []string) string {
 		LogRecord(fmt.Sprintf("Error: %s", err.Error()))
 		os.Exit(1)
 	}
-	return ZDNSJson2String(opBytes)
+	return ZDNSALookUpJson2String(opBytes)
 }

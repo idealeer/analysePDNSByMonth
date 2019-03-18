@@ -173,6 +173,7 @@ func analyseByGeo(ccmd uint8) {
 		anlyseIPv6V6V4Geo()     			// 第三：分析活跃IPv6
 		anlyseSLDV6V4Geo()      			// 第四：分析SLD
 		anlyseSLDTimesV6V4Geo()				// 分析SLD请求次数
+		OutShowResult()						// 将结果保存到v46两个文件夹
 
 	default:
 		util.LogRecord("什么也没做\tPlease add the correct [-function parm]")

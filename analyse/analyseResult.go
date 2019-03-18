@@ -557,7 +557,7 @@ func outDomainTimes(fileName string, countryS string, v4GeoFile string) {
 	for {
 		if readedCount%variables.LogShowBigLag == 0 {
 			readedCount = 0
-			util.LogRecord(fmt.Sprintf("readedtotal: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
+			util.LogRecord(fmt.Sprintf("DomainTimes read: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 		}
 		dv4Bytes, _, e := inNowFile.ReadLine()
 		if e == io.EOF {

@@ -51,6 +51,20 @@ func GetApiResFileName(fileName string, fileExtion string) string {
 }
 
 /*
+	获得展示V4文件夹中的完整文件名
+ */
+func GetShowV4FileName(fileName string, fileExtion string) string {
+	return fmt.Sprintf("%s%s.%s", variables.ShowV4FolderName, fileName, fileExtion)
+}
+
+/*
+	获得展示V6文件夹中的完整文件名
+ */
+func GetShowV6FileName(fileName string, fileExtion string) string {
+	return fmt.Sprintf("%s%s.%s", variables.ShowV6FolderName, fileName, fileExtion)
+}
+
+/*
 	判断是否是DNS文件夹
  */
 func IsTheDNSFolder(fi os.FileInfo) bool {

@@ -64,6 +64,7 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CmdApi2Json, "API结果转Json")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdAnalyseMul, "统计多个月份数据")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdAnaRes, "分析结果文件")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdOutV46Res, "输出展示文件")+
 
 			fmt.Sprintf("%d\t%s", constants.CmdDefault, "什么也没做(默认)"))
 
@@ -241,6 +242,8 @@ func main() {
 		analyse.PrepareSimpleLog()
 		analyse.AnalyseResult()
 		analyse.EndSimpleLog()
+	case constants.CmdOutV46Res:
+		analyse.OutShowResult()
 	case constants.CmdAnalyseMul:
 
 

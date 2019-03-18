@@ -181,6 +181,8 @@ const (
 
 	CmdAnaRes																	// 分析统计结果
 
+	CmdOutV46Res																// 输出v46结果到展示文件夹
+
 	CmdDefault
 )
 //
