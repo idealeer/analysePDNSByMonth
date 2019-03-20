@@ -356,6 +356,31 @@ func PrepareMaxMind(fileName string) {
 }
 
 /*
+	MaxMindASN数据库准备
+ */
+func PrepareMaxMindASN(fileName string) {
+	fg, err := os.Stat(fileName)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\nPlease add the correct [-mmdb-asn parm](mmdb file)", err.Error()))
+		os.Exit(1)
+	}
+	if fg.IsDir() {
+		util.LogRecord(fmt.Sprintf("Error: Please add the correct [-mmdb-asn parm](mmdb file)"))
+		os.Exit(1)
+	}
+
+	variables.MaxMindASNDBName = fileName
+
+	// 打开maxminddbASN数据库
+	geoDB, eO := geoip2.Open(variables.MaxMindASNDBName)
+	if eO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eO.Error()))
+		os.Exit(1)
+	}
+	variables.MaxMindASNReader = geoDB
+}
+
+/*
 	日期月份准备
  */
 func PrepareDate(date string, dateBefore string, dateEnd string) {
@@ -408,6 +433,37 @@ func PrepareSpecCty(date string, dateBefore string, ctys string) {
 		}
 	}
 }
+
+/*
+	指定国家准备
+ */
+func PrepareASNCty(date string, dateBefore string, ctys string) {
+	if util.MatchRegexp(constants.DateRegexp, date) {
+		variables.ASNDateSpec = date
+	} else{
+		fmt.Printf("Error: Please add the correct [-date parm], like %s\n", constants.DateExample)
+		os.Exit(1)
+	}
+	if util.MatchRegexp(constants.DateRegexp, dateBefore) {
+		variables.ASNDateBefore = dateBefore
+	} else{
+		fmt.Printf("Error: Please add the correct [-date-before parm], like %s\n", constants.DateExample)
+		os.Exit(1)
+	}
+	// 国家列表
+	if ctys == "" {
+		util.LogRecord(fmt.Sprintf("Error: \tPlease add the correct [-ctys parm]"))
+		os.Exit(1)
+	} else {
+		if ctys == "ALL,CN,US" {
+			variables.ASNCountrys = "CN"
+
+		} else {
+			variables.ASNCountrys = ctys
+		}
+	}
+}
+
 
 /*
 	dns解析文件准备

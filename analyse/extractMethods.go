@@ -111,20 +111,23 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 /*
 	获得指定国家的记录及去重IPv6地址
  */
-func GetSpecCountryRecordAndUniqIPv6() {
-	getSpecCountryRecordAndUniqIPv6(variables.ScanCountrys, variables.RecordHisDir, variables.ScanDateSpec, variables.ScanDateBefore)
+func getSpecCountryRecordAndUniqIPv6() {
+	ggetSpecCountryRecordAndUniqIPv6(variables.ScanCountrys, variables.RecordHisDir, variables.ScanDateSpec, variables.ScanDateBefore)
 }
 
 /*
-	获得指定国家的记录及去重IPv6地址
+	获得指定国家的记录及去重IPv6\IPv4地址
  */
-func getSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateSpec string, dateBefore string) {
+func ggetSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateSpec string, dateBefore string) {
 	timeNow := time.Now()
 	util.LogRecord("Excuting: " + recordFolder + "&" + countrys + " -> " + recordFolder + "temp-" + dateSpec + "/" + countrys)
 
 	var ctyUniqIPv6Map = make(types.TPMSTPMSS)					// 每个国家的去重IPv6字典
 	var ctyRecordWritter = make(map[string]*bufio.Writer)		// 每个国家的recordWritter
 	var ctyUniqIPv6Writter = make(map[string]*bufio.Writer)		// 每个国家的uniqRecordWritter
+	var ctyUniqIPv4Map = make(types.TPMSTPMSS)					// 每个国家的去重IPv4字典
+	var ctyUniqIPv4Writter = make(map[string]*bufio.Writer)		// 每个国家的uniqRecordWritter
+
 	var ctyMap = make (types.TPMSS)
 
 	// 创建文件夹准备
@@ -132,6 +135,8 @@ func getSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateS
 		if _, ok := ctyUniqIPv6Map[cty]; !ok {
 			u6Map := make(types.TPMSS, constants.YWTimes)
 			ctyUniqIPv6Map[cty] = u6Map
+			u4Map := make(types.TPMSS, constants.YWTimes)
+			ctyUniqIPv4Map[cty] = u4Map
 			ctyMap[cty] = cty
 		}
 		// 创建国家文件夹
@@ -162,6 +167,15 @@ func getSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateS
 			os.Exit(1)
 		}
 		ctyUniqIPv6Writter[cty] = bufio.NewWriter(fw2) // 创建新的 Writer 对象
+		// 创建uniqIPv4写出变量
+		ctyUniqIPv4FN := ctyFolder + constants.ScanUniqIPv4String + "." + constants.ScanFileExtion
+		fw3, err3 := os.OpenFile(ctyUniqIPv4FN, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+		defer fw3.Close()
+		if err3 != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err3.Error()))
+			os.Exit(1)
+		}
+		ctyUniqIPv4Writter[cty] = bufio.NewWriter(fw3) // 创建新的 Writer 对象
 	}
 
 	// 获得区间日期月份
@@ -201,6 +215,7 @@ func getSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateS
 			// 属于分析的国家
 			if _, ok := ctyMap[dnsRecordV4Geo]; ok {
 				dnsRecordIPv6List := strings.Split(strings.TrimRight(dnsRecordList[constants.GeoIPv6Index], ";"), ";")
+				dnsRecordIPv4List := strings.Split(strings.TrimRight(dnsRecordList[constants.GeoIPv4Index], ";"), ";")
 
 				// 输出记录
 				_, err = ctyRecordWritter[dnsRecordV4Geo].WriteString(lineString + "\n")
@@ -225,12 +240,26 @@ func getSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateS
 						ctyUniqIPv6Map[dnsRecordV4Geo][dnsRecordIPv6] = ""
 					}
 				}
+
+				// 输出IPv4地址
+				for _, dnsRecordIPv4 := range dnsRecordIPv4List {
+					if _, ok := ctyUniqIPv4Map[dnsRecordV4Geo][dnsRecordIPv4]; !ok {
+
+						// 输出记录
+						_, err = ctyUniqIPv4Writter[dnsRecordV4Geo].WriteString(dnsRecordIPv4 + "\n")
+						if err != nil {
+							util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+							os.Exit(1)
+						}
+						ctyUniqIPv4Writter[dnsRecordV4Geo].Flush()
+
+						ctyUniqIPv4Map[dnsRecordV4Geo][dnsRecordIPv4] = ""
+					}
+				}
 			}
 		}
 		util.LogRecord(fmt.Sprintf("temp-%s: readedtotal: %d, remind: %d files, cost: %ds", ym, readedTotal, ymLen - index - 1, time.Now().Sub(timeNow) / time.Second))
 	}
 
-	fmt.Println(ctyUniqIPv6Map)
-
-	util.LogRecord("Ending: " + recordFolder + "&" + countrys + " -> " + recordFolder + "/temp-" + dateSpec + "/" + countrys)
+	util.LogRecord("Ending: " + recordFolder + "&" + countrys + " -> " + recordFolder + "temp-" + dateSpec + "/" + countrys)
 }

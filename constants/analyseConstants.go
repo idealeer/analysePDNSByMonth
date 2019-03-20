@@ -182,9 +182,7 @@ const (
 
 	CmdAnaRes																	// 分析统计结果
 
-	CmdOutV46Res																// 输出v46结果到展示文件夹
-
-	CmdGetCtyRecordIP															// 获得指定国家的记录、IPv6
+	CmdMMASNDB																	// ASN查询
 
 	CmdDefault
 )
@@ -202,6 +200,7 @@ const (
 	CCmdUniqTLD				// 去重TLD
 	CCmdAnaTLDTimes			// 统计TLD次数
 
+
 	CCmdGetGeo            // 获取地理
 	CCmdUniqDomainByGeo   // 去重域名By地理
 	CCmdUniqIPv6ByGeo     // 去重IPv6By地址地理
@@ -212,7 +211,19 @@ const (
 	CCmdAnaSLDByGeo       // 分析SLDBy地理
 	CCmdAnaSLDTimesByGeo  // 分析SLD请求次数By地理
 
+	CCmdAnaOver				// 分析结束
+
 	CCmdUnionBeforeRes		// 合并历史结果
+
+	CCmdOutV46Res			// 输出v46结果到展示文件夹
+
+	CCmdGetInlandShow		// 获得国内态势
+
+	CCmdGetCtyRecordIP		// 获得指定国家的记录、IPv6
+
+	CCmdAnaASNDis			// 分析ASN、域名地理分布
+
+	CCMdAnaNmapPort			// 分析Nmap扫描结果中的端口
 
 	CCmdDefault
 )

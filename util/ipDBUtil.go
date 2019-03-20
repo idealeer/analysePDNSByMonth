@@ -144,3 +144,14 @@ func GetISOCNMap(fileName string) {
 	LogRecord("Ending: " + fileName)
 }
 
+/*
+	根据MaxMind数据库获得IP地理信息，返回示例：中国大陆;China;CN;00001
+ */
+func GetIPASNByMM(ip string, mmdb *geoip2.Reader) (uint, string) {
+	ipIP := net.ParseIP(ip)
+	record, err := mmdb.ASN(ipIP)
+	if err != nil || record.AutonomousSystemNumber == 0 {
+		return constants.ASNNullNumber, constants.ASNNullString
+	}
+	return record.AutonomousSystemNumber, record.AutonomousSystemOrganization
+}

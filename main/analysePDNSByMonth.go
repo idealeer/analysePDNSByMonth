@@ -23,6 +23,7 @@ var (
 	excute     		int    	// 任务
 	function   		int    	// 功能
 	mmdb       		string 	// mmdb数据库
+	mmdbASN       	string 	// mmdbASN数据库
 	date       		string 	// 指定日期月份
 	dateBefore		string	// 先前日期月份
 	dateEnd			string	// 截止日期月份
@@ -64,7 +65,6 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CmdApi2Json, "API结果转Json")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdAnalyseMul, "统计多个月份数据")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdAnaRes, "分析结果文件")+
-			fmt.Sprintf("%d\t%s\n", constants.CmdOutV46Res, "输出展示文件")+
 
 			fmt.Sprintf("%d\t%s", constants.CmdDefault, "什么也没做(默认)"))
 
@@ -76,6 +76,8 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CCmdUniqDomain, "统计PDNS数据:去重域名\t\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdNSIPv4, "统计PDNS数据:查询IPv4地址\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdUnionDNSV4, "统计PDNS数据:合并DNS记录&V4地址\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdOutV46Res, "输出展示文件")+
+
 
 			fmt.Sprintf("%d\t%s\n", constants.CCmdUniqTLD, "统计PDNS数据:去重TLD\t\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaTLDTimes, "统计PDNS数据:分析TLD请求次数\t(须指定:-excute [0])")+
@@ -91,11 +93,19 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaSLDTimesByGeo, "统计PDNS数据:分析SLD请求次数\t(须指定:-excute [0])")+
 
 			fmt.Sprintf("%d\t%s\n", constants.CCmdUnionBeforeRes, "统计PDNS数据:合并历史结果文件\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdOutV46Res, "统计PDNS数据:将结果转换为接口文件\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdGetInlandShow, "统计PDNS数据:获得国内态势\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdGetCtyRecordIP, "统计PDNS数据:获得指定国家全部记录\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaASNDis, "统计PDNS数据:获得ASN分布\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCMdAnaNmapPort, "统计PDNS数据:获得ASN分布\t(须指定:-excute [0])")+
 
 			fmt.Sprintf("%d\t%s", constants.CCmdDefault, "什么也没做(默认)"))
 
 	flag.StringVar(&mmdb, "mmdb", "",
 		fmt.Sprintf("%s", "mmdb数据库路径"))
+
+	flag.StringVar(&mmdbASN, "mmdb-asn", "",
+		fmt.Sprintf("%s", "mmdbASN数据库路径"))
 
 	flag.StringVar(&date, "date", constants.DateExample,
 		fmt.Sprintf("%s", "指定日期月份"))
@@ -214,8 +224,12 @@ func main() {
 		analyse.PrepareD4File(d4File)
 		analyse.PrepareV46GeoFile(v4GeoFile, v6GeoFile)
 		analyse.PrepareMaxMind(mmdb)
+		analyse.PrepareMaxMindASN(mmdbASN)
 		analyse.PrepareZDNS(zdns, threads)
 		analyse.PrepareTopN(topN)
+		analyse.PrepareSpecCty(date, dateBefore, ctyList)
+		analyse.PrepareASNCty(date, dateBefore, ctyList)
+
 		analyse.Analyse(ccmd)
 		if ccmd == constants.CCmdAll || (ccmd >= constants.CCmdGetGeo && ccmd <= constants.CCmdAnaSLDTimesByGeo) {
 			analyse.EndReserveResAndTemp()
@@ -223,6 +237,9 @@ func main() {
 	case constants.CmdMMDB:
 		analyse.PrepareMaxMind(mmdb)
 		analyse.GetIPsGeoByMM(ips, ipFile)
+	case constants.CmdMMASNDB:
+		analyse.PrepareMaxMindASN(mmdbASN)
+		//analyse.GetIPsGeoByMM(ips, ipFile)
 	case constants.CmdUnionFile:
 		analyse.UnionFiles(destyDir)
 	case constants.CmdNS:
@@ -242,13 +259,7 @@ func main() {
 		analyse.PrepareSimpleLog()
 		analyse.AnalyseResult()
 		analyse.EndSimpleLog()
-	case constants.CmdOutV46Res:
-		analyse.OutShowResult()
-	case constants.CmdGetCtyRecordIP:
-		analyse.PrepareSpecCty(date, dateBefore, ctyList)
-		analyse.GetSpecCountryRecordAndUniqIPv6()
 	case constants.CmdAnalyseMul:
-
 
 		var mList = make([]string, 0)
 		mList = analyse.PrepareOrder(inc, dec)

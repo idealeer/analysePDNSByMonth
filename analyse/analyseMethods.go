@@ -29,6 +29,17 @@ func Analyse(ccmd uint8) {
 		analyseTLD(ccmd)
 	case ccmd == constants.CCmdUnionBeforeRes:
 		unionBeforeRes()
+	case ccmd == constants.CCmdOutV46Res:
+		OutShowResult()
+	case ccmd == constants.CCmdGetInlandShow:
+		getSpecCountryRecordAndUniqIPv6()
+		getSpecCountryASNAndGeo()
+	case ccmd == constants.CCmdGetCtyRecordIP:
+		getSpecCountryRecordAndUniqIPv6()
+	case ccmd == constants.CCmdAnaASNDis:
+		getSpecCountryASNAndGeo()
+	case ccmd == constants.CCMdAnaNmapPort:
+		extractNmapPortResult()
 	default:
 		util.LogRecord("什么也没做\tPlease add the correct [-function parm]")
 	}

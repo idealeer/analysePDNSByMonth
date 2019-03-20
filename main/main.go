@@ -9,11 +9,9 @@
 package main
 
 import (
-	"analysePDNSByMonth/types"
 	"analysePDNSByMonth/util"
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -277,9 +275,5 @@ func Test201811China(fileName string) {
 }
 
 func main() {
-	var l = make(types.DCIList, 0)
-	l = append(l, types.DCI{"360.net", 100})
-	lb, _ := json.Marshal(l)
-
-	fmt.Println(string(lb))
+	fmt.Println(strings.HasSuffix("www.edu.cnn", "edu.cn"))
 }

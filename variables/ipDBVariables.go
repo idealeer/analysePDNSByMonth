@@ -10,5 +10,8 @@ package variables
 
 import "github.com/oschwald/geoip2-golang"
 
-var MaxMindDBName	string			// MaxMind数据库名称
-var MaxMindReader	*geoip2.Reader	// MaxMind数据库读取器
+var MaxMindDBName	string			// MaxMindGeo数据库名称
+var MaxMindReader	*geoip2.Reader	// MaxMindGeo数据库读取器
+
+var MaxMindASNDBName	string			// MaxMindASN数据库名称
+var MaxMindASNReader	*geoip2.Reader	// MaxMindASN数据库读取器

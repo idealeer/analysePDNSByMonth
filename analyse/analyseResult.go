@@ -593,4 +593,3 @@ func outDomainTimes(fileName string, countryS string, v4GeoFile string) {
 	util.LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow)/time.Second))
 	util.LogRecord("Ending: " + fileName + ", country: " + countryS)
 }
-

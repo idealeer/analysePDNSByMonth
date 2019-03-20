@@ -21,3 +21,6 @@ const (
 	ISOIndex			int8 = iota
 	CNNameIndex
 )
+
+const ASNNullNumber		uint = 0
+const ASNNullString		string = "null"

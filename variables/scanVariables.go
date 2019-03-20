@@ -13,5 +13,4 @@ var ScanCountrys		string				// 分析国家列表
 var	ScanDateBefore		string				// 起始分析日期
 var ScanDateSpec		string				// 截止分析日期
 
-
 //

@@ -10,5 +10,7 @@ package constants
 
 const ScanRecordString		string = "record"		// 指定记录
 const ScanUniqIPv6String	string = "uniqIPv6"		// 指定去重IPv6地址
+const ScanUniqIPv4String	string = "uniqIPv4"		// 指定去重IPv6地址
+
 
 const ScanFileExtion		string = "txt"
