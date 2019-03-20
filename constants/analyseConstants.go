@@ -89,7 +89,7 @@ const (
 
 // 去重域名文件+地理
 const (
-	GeoUDDomainIndex  				int8 = iota 									// 域名位置
+	GeoUDDomainIndex  				int8 = iota 								// 域名位置
 	GeoUDV6GIndex                 												// V6地理位置
 	GeoUDV4GIndex                 												// V4地理位置
 )
@@ -145,6 +145,7 @@ const UnionFileExtion			string = "uf"									// 合并文件扩展名
 //
 
 //// 字符串
+const AllCountryString			string = "ALL"									// 所有国家
 const TotalTimesString 			string = "total" 								// 统计"总数" 名
 const V4GeoString 				string = "v4Geo"                 				// v4地理
 const V6GeoString 				string = "v6Geo"                 				// v6地理
@@ -182,6 +183,8 @@ const (
 	CmdAnaRes																	// 分析统计结果
 
 	CmdOutV46Res																// 输出v46结果到展示文件夹
+
+	CmdGetCtyRecordIP															// 获得指定国家的记录、IPv6
 
 	CmdDefault
 )

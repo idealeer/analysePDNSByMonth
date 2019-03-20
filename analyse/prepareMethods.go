@@ -172,12 +172,12 @@ func PrepareAnaRes(fileDir string, cnp int, cnz int, ctys string) {
 
 	// 国家列表
 	if ctys == "" {
-		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ctys parm]", err.Error()))
+		util.LogRecord(fmt.Sprintf("Error: \tPlease add the correct [-ctys parm]"))
 		os.Exit(1)
 	} else {
 		ctyList := strings.Split(ctys, ",")
 		for _, cty := range ctyList {
-			if _, ok := variables.IsoCNNameMap[cty]; !ok && cty != constants.TotalTimesString {
+			if _, ok := variables.IsoCNNameMap[cty]; !ok && cty != constants.AllCountryString {
 				util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ctys parm], not %s", err.Error(), cty))
 				os.Exit(1)
 			}
@@ -376,6 +376,36 @@ func PrepareDate(date string, dateBefore string, dateEnd string) {
 	} else{
 		fmt.Printf("Error: Please add the correct [-date-end parm], like %s\n", constants.DateExample)
 		os.Exit(1)
+	}
+}
+
+/*
+	指定国家准备
+ */
+func PrepareSpecCty(date string, dateBefore string, ctys string) {
+	if util.MatchRegexp(constants.DateRegexp, date) {
+		variables.ScanDateSpec = date
+	} else{
+		fmt.Printf("Error: Please add the correct [-date parm], like %s\n", constants.DateExample)
+		os.Exit(1)
+	}
+	if util.MatchRegexp(constants.DateRegexp, dateBefore) {
+		variables.ScanDateBefore = dateBefore
+	} else{
+		fmt.Printf("Error: Please add the correct [-date-before parm], like %s\n", constants.DateExample)
+		os.Exit(1)
+	}
+	// 国家列表
+	if ctys == "" {
+		util.LogRecord(fmt.Sprintf("Error: \tPlease add the correct [-ctys parm]"))
+		os.Exit(1)
+	} else {
+		if ctys == "ALL,CN,US" {
+			variables.ScanCountrys = "CN"
+
+		} else {
+			variables.ScanCountrys = ctys
+		}
 	}
 }
 

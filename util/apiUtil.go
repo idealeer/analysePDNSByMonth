@@ -76,15 +76,15 @@ func Api2JsonMap(apiFile string, jsonFile string) {
 			tempMap := make(types.TPMSI64)
 			resMap[geo][country] = tempMap
 		}
-		if resMap[geo][constants.TotalTimesString] == nil {
+		if resMap[geo][constants.AllCountryString] == nil {
 			tempMap := make(types.TPMSI64)
-			resMap[geo][constants.TotalTimesString] = tempMap
+			resMap[geo][constants.AllCountryString] = tempMap
 		}
 		for j := 0; j < ymLen; j++ {
 			resMap[geo][country][ymList[j]] += countList[j + constants.ApiCountStartIndex]
 			resMap[geo][country][constants.TotalTimesString] += countList[j + constants.ApiCountStartIndex]
-			resMap[geo][constants.TotalTimesString][ymList[j]] += countList[j + constants.ApiCountStartIndex]
-			resMap[geo][constants.TotalTimesString][constants.TotalTimesString] += countList[j + constants.ApiCountStartIndex]
+			resMap[geo][constants.AllCountryString][ymList[j]] += countList[j + constants.ApiCountStartIndex]
+			resMap[geo][constants.AllCountryString][constants.TotalTimesString] += countList[j + constants.ApiCountStartIndex]
 		}
 	}
 

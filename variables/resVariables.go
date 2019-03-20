@@ -33,6 +33,3 @@ var IsoCNNameMap	map[string]string	// 简称对应中文国家名
 var IPv6TrendFolderName string // 展示文件夹
 var ShowV4FolderName string    // v4
 var ShowV6FolderName string    // v6
-
-
-

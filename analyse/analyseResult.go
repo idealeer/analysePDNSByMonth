@@ -44,7 +44,7 @@ func AnalyseResult() {
 		outDomainAlive(variables.JsonV6DomainAlive, cty)
 		outSLDAlive(variables.JsonV6SLDAlive, cty)
 		outSLDTimes(variables.JsonV6SLDTimes, cty)
-		if cty == constants.TotalTimesString {
+		if cty == constants.AllCountryString {
 			outTLDTimes(variables.JsonTLDTimes, cty)
 			outIpv6Times(variables.V6GeoFileName, variables.Countrys)
 			outDomainTimes(variables.D4FileName, variables.Countrys, variables.V4GeoFileName)
@@ -438,7 +438,7 @@ func outIpv6Times(fileName string, countryS string) {
 	timeNow := time.Now()
 	util.LogRecord("Excuting: " + fileName + ", countrys: " + countryS)
 
-	var nowMap = make(types.TPMSI64)
+	var countryCountMap = make(types.TPMSI64)
 	var geoMap = make(types.TPMSS)
 
 	// 分析国家
@@ -472,19 +472,19 @@ func outIpv6Times(fileName string, countryS string) {
 		cty := strings.Split(v6GeoStr, "\t")[1]
 
 		if _, ok := geoMap[cty]; ok {
-			nowMap[cty] ++
+			countryCountMap[cty] ++
 		}
-		nowMap[constants.TotalTimesString] ++
+		countryCountMap[constants.AllCountryString] ++
 	}
 	util.LogRecord(fmt.Sprintf("readedtotal: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow) / time.Second))
 
 	resOut := ""
 
 	for _, cty := range strings.Split(variables.Countrys, ",") {
-		if cty == constants.TotalTimesString {
-			resOut += fmt.Sprintf(constants.ResStrIPv6Times, nowMap[constants.TotalTimesString] / constants.YWTimes)
+		if cty == constants.AllCountryString {
+			resOut += fmt.Sprintf(constants.ResStrIPv6Times, countryCountMap[constants.AllCountryString] / constants.YWTimes)
 		} else {
-			resOut += fmt.Sprintf(constants.ResStrCTimes, geoMap[cty], nowMap[cty] / constants.YWTimes)
+			resOut += fmt.Sprintf(constants.ResStrCTimes, geoMap[cty], countryCountMap[cty] / constants.YWTimes)
 		}
 	}
 
@@ -500,14 +500,14 @@ func outDomainTimes(fileName string, countryS string, v4GeoFile string) {
 	timeNow := time.Now()
 	util.LogRecord("Excuting: " + fileName + ", countrys: " + countryS)
 
-	var nowMap= make(types.TPMSI64)
-	var geoMap= make(types.TPMSS)
-	var ip4GeoMap= make(types.TPMSS, constants.MapAllocLen)	// 用于查找地理
+	var countryCountMap = make(types.TPMSI64)
+	var geoMap = make(types.TPMSS)
+	var ip4GeoMap = make(types.TPMSS, constants.MapAllocLen)	// 用于查找地理
 
 	var readedCount uint64 = 0
 	var readedTotal uint64 = 0
 
-	// 分析国家字典
+	// 分析国家的字典
 	for _, cty := range strings.Split(variables.Countrys, ",") {
 		geoMap[cty] = variables.IsoCNNameMap[cty]
 	}
@@ -571,19 +571,19 @@ func outDomainTimes(fileName string, countryS string, v4GeoFile string) {
 		v4Geo := ip4GeoMap[v4]
 
 		if _, ok := geoMap[v4Geo]; ok {
-			nowMap[v4Geo] ++
+			countryCountMap[v4Geo] ++
 		}
-		nowMap[constants.TotalTimesString] ++
+		countryCountMap[constants.AllCountryString] ++
 	}
 	util.LogRecord(fmt.Sprintf("readedtotal: %d, cost: %ds", readedTotal, time.Now().Sub(timeNow)/time.Second))
 
 	resOut := ""
 
 	for _, cty := range strings.Split(variables.Countrys, ",") {
-		if cty == constants.TotalTimesString {
-			resOut += fmt.Sprintf(constants.ResStrDomainTimes, nowMap[constants.TotalTimesString]/constants.YWTimes)
+		if cty == constants.AllCountryString {
+			resOut += fmt.Sprintf(constants.ResStrDomainTimes, countryCountMap[constants.AllCountryString]/constants.YWTimes)
 		} else {
-			resOut += fmt.Sprintf(constants.ResStrCTimes, geoMap[cty], nowMap[cty]/constants.YWTimes)
+			resOut += fmt.Sprintf(constants.ResStrCTimes, geoMap[cty], countryCountMap[cty]/constants.YWTimes)
 		}
 	}
 

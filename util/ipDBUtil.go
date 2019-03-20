@@ -138,7 +138,7 @@ func GetISOCNMap(fileName string) {
 		//}
 	}
 
-	variables.IsoCNNameMap[constants.TotalTimesString] = ""
+	variables.IsoCNNameMap[constants.AllCountryString] = ""
 
 	LogRecord(fmt.Sprintf("cost: %ds", time.Now().Sub(timeNow) / time.Second))
 	LogRecord("Ending: " + fileName)

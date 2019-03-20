@@ -9,7 +9,7 @@
 package constants
 
 // dns请求次数
-const ResStrDNSTimes		string = `DNS解析请求总次数达%d亿余次，平均每天%d万余次、每月%d万余次。单月请求次数，最多为%s的%d万余次，最少为%s的%d万余次。中国总人口近%d亿，这意味着平均每%d个国人每天对%s的IPv6域名进行一次解析请求。截止2018年6月30日，中国网民达%d亿人，表明平均每%d位中国网民每天对%s的IPv6域名进行一次解析请求。`
+const ResStrDNSTimes		string = `DNS解析请求总次数达%d亿余次，平均每天%d万余次、每月%d万余次。单月请求次数，最多为%s的%d万余次，最少为%s的%d万余次。中国总人口近%d亿，这意味着平均每%d个国人每天对%sIPv6域名进行一次解析请求。截止2018年6月30日，中国网民达%d亿人，表明平均每%d位中国网民每天对%sIPv6域名进行一次解析请求。`
 
 // IPv6活跃总量
 const ResStrIPv6Alive		string = `IPv6地址活跃总量达%d万余个，平均每月活跃量为%d万余个。单月活跃量，最多为%s的%d万余个，最少为%s的%d个。`
@@ -49,3 +49,8 @@ const ShowDNSTimes			string = "seen_by_country"					// DNS请求次数
 const TopNSLD				string = "top_50_sld_by_area"				// topN-SLD
 const TopNSLDTotal			string = "top_sld_seen"						// topN-SLD-Total
 const TopNTLD				string = "top_tld_seen"						// topN-TLD
+
+const ShowDomainDIPFName		string = "domain_divide_ip_by_area"			// 活跃域名量/活跃IP量
+const ShowIPv6DSLDFName			string = "ip_divide_sld_by_area"			// 活跃IP量/活跃SLD量
+const ShowDNSDDomainFName		string = "dns_divide_domain_by_area"		// DNS请求次数/活跃域名量
+const ShowDNSDIPv6FName			string = "dns_divide_ip_by_area"			// DNS请求次数/活跃IP量

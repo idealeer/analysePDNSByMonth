@@ -182,7 +182,7 @@ func init() {
 	flag.IntVar(&cnNzNum, "cnn", 8,
 		fmt.Sprintf("中国网民(单位:亿)"))
 
-	flag.StringVar(&ctyList, "ctys", "total,CN,US",
+	flag.StringVar(&ctyList, "ctys", "ALL,CN,US",
 		fmt.Sprintf("%s", "分析国家列表(,分隔)"))
 
 	flag.StringVar(&isoCNNameFile, "iso-dir", "",
@@ -244,6 +244,9 @@ func main() {
 		analyse.EndSimpleLog()
 	case constants.CmdOutV46Res:
 		analyse.OutShowResult()
+	case constants.CmdGetCtyRecordIP:
+		analyse.PrepareSpecCty(date, dateBefore, ctyList)
+		analyse.GetSpecCountryRecordAndUniqIPv6()
 	case constants.CmdAnalyseMul:
 
 

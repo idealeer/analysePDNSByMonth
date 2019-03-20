@@ -49,6 +49,44 @@ func GetChineseMonth(ym string) string {
 /*
 	获得指定年月间的年月表，通过指定年月区间，包括截止月
  */
+func GetSpecYMsByYMStr(sym string, eym string) ([]string, int) {
+	dateInt, _:= strconv.Atoi(sym)
+	dateEndInt, _:= strconv.Atoi(eym)
+	sy := dateInt / 100
+	sm := dateInt % 100
+	ey := dateEndInt / 100
+	em := dateEndInt % 100
+	var yms = make([]string, 0)
+	if sy == ey {							// 同一年
+		for m := sm; m <= em; m++ {
+			ym := fmt.Sprintf("%04d%02d", sy, m)
+			yms = append(yms, ym)
+		}
+	} else {								// 不同年
+		// 起始年
+		for m := sm; m <= 12; m++ {
+			ym := fmt.Sprintf("%04d%02d", sy, m)
+			yms = append(yms, ym)
+		}
+		// 中间年
+		for y := sy + 1; y < ey; y++ {
+			for m := 1; m <= 12; m++ {
+				ym := fmt.Sprintf("%04d%02d", y, m)
+				yms = append(yms, ym)
+			}
+		}
+		// 截止年
+		for m := 1; m <= em; m++ {
+			ym := fmt.Sprintf("%04d%02d", ey, m)
+			yms = append(yms, ym)
+		}
+	}
+	return yms, (ey - sy) * 12 - sm + em + 1
+}
+
+/*
+	获得指定年月间的年月表，通过指定年月区间，包括截止月
+ */
 func GetSpecYMsByYM(sy int, sm int, ey int, em int) ([]string, int) {
 	ymNum := (ey - sy) * 12 - sm + em + 1	// 总月份个数
 	var yms = make([]string, 0)

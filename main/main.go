@@ -277,8 +277,8 @@ func Test201811China(fileName string) {
 }
 
 func main() {
-	var l = make(types.DCList, 0)
-	l = append(l, types.DC{"360.net", 100})
+	var l = make(types.DCIList, 0)
+	l = append(l, types.DCI{"360.net", 100})
 	lb, _ := json.Marshal(l)
 
 	fmt.Println(string(lb))

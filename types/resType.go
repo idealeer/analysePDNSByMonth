@@ -8,16 +8,20 @@
 
 package types
 
-type DC struct {
+type DCI struct {
 	Domain   	string					`json:"domain,omitempty"`
 	Count 		int64					`json:"count,omitempty"`
 }
 
-type DCList []DC						// 单个国家域名+次数
+type DCIList []DCI // 单个国家域名+次数
 
-func (p DCList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-func (p DCList) Len() int           { return len(p) }
-func (p DCList) Less(i, j int) bool { return p[i].Count < p[j].Count }
+func (p DCIList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p DCIList) Len() int           { return len(p) }
+func (p DCIList) Less(i, j int) bool { return p[i].Count < p[j].Count }
+
+type DCIListMap map[string]DCIList // SLD与TLD输出格式
 
 
-type DCListMap	map[string]DCList		// SLD与TLD输出格式
+type TPMSF64 map[string]float64     			// 自定义类型：map[string]float64
+type TPMSTPMSF64 map[string]TPMSF64 			// 自定义类型：map[string](map[string]float64)
+

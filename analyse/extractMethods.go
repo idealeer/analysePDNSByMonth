@@ -9,6 +9,8 @@
 package analyse
 
 import (
+	"analysePDNSByMonth/constants"
+	"analysePDNSByMonth/types"
 	"analysePDNSByMonth/util"
 	"analysePDNSByMonth/variables"
 	"bufio"
@@ -16,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -102,5 +105,132 @@ func getSimpleIPv4(fileName string, fileNameNew string) {
 	}
 	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
 
-	util.LogRecord("Excuting: " + fileName + "->"  + fileNameNew)
+	util.LogRecord("Ending: " + fileName + "->"  + fileNameNew)
+}
+
+/*
+	获得指定国家的记录及去重IPv6地址
+ */
+func GetSpecCountryRecordAndUniqIPv6() {
+	getSpecCountryRecordAndUniqIPv6(variables.ScanCountrys, variables.RecordHisDir, variables.ScanDateSpec, variables.ScanDateBefore)
+}
+
+/*
+	获得指定国家的记录及去重IPv6地址
+ */
+func getSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, dateSpec string, dateBefore string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " + recordFolder + "&" + countrys + " -> " + recordFolder + "temp-" + dateSpec + "/" + countrys)
+
+	var ctyUniqIPv6Map = make(types.TPMSTPMSS)					// 每个国家的去重IPv6字典
+	var ctyRecordWritter = make(map[string]*bufio.Writer)		// 每个国家的recordWritter
+	var ctyUniqIPv6Writter = make(map[string]*bufio.Writer)		// 每个国家的uniqRecordWritter
+	var ctyMap = make (types.TPMSS)
+
+	// 创建文件夹准备
+	for _, cty := range strings.Split(countrys, ",") {
+		if _, ok := ctyUniqIPv6Map[cty]; !ok {
+			u6Map := make(types.TPMSS, constants.YWTimes)
+			ctyUniqIPv6Map[cty] = u6Map
+			ctyMap[cty] = cty
+		}
+		// 创建国家文件夹
+		ctyFolder := recordFolder + constants.DNSTempFolder + "-" + variables.DNSDateSpec + string(os.PathSeparator) + cty + string(os.PathSeparator)
+		_, err := os.Stat(ctyFolder)
+		if err != nil {
+			ec := os.Mkdir(ctyFolder, os.ModePerm)
+			if ec != nil {
+				util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+				os.Exit(1)
+			}
+		}
+		// 创建record写出变量
+		ctyRecordFN := ctyFolder + constants.ScanRecordString + "." + constants.ScanFileExtion
+		fw1, err1 := os.OpenFile(ctyRecordFN, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+		defer fw1.Close()
+		if err1 != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err1.Error()))
+			os.Exit(1)
+		}
+		ctyRecordWritter[cty] = bufio.NewWriter(fw1) // 创建新的 Writer 对象
+		// 创建uniqIPv6写出变量
+		ctyUniqIPv6FN := ctyFolder + constants.ScanUniqIPv6String + "." + constants.ScanFileExtion
+		fw2, err2 := os.OpenFile(ctyUniqIPv6FN, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+		defer fw2.Close()
+		if err2 != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err2.Error()))
+			os.Exit(1)
+		}
+		ctyUniqIPv6Writter[cty] = bufio.NewWriter(fw2) // 创建新的 Writer 对象
+	}
+
+	// 获得区间日期月份
+	ymList, ymLen := util.GetSpecYMsByYMStr(dateBefore, dateSpec)
+
+	for index, ym := range ymList {
+		trFN := recordFolder + constants.DNSTempFolder + "-" + ym + string(os.PathSeparator) + constants.DNSFileV6GeoV4GeoName
+
+		// 打开记录文件
+		srcFile, err := os.Open(trFN)
+		if err != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+			os.Exit(1)
+		}
+		defer srcFile.Close()	// 该函数执行完毕退出前才会执行defer后的语句
+		br := bufio.NewReader(srcFile)
+
+		var readedCount uint64 = 0
+		var readedTotal uint64 = 0
+
+		for {
+			if readedCount % variables.LogShowBigLag == 0 {
+				readedCount = 0
+				util.LogRecord(fmt.Sprintf("temp-%s: readedtotal: %d, remind: %d files, cost: %ds", ym, readedTotal, ymLen - index - 1, time.Now().Sub(timeNow) / time.Second))
+			}
+			lineBytes, _, eR := br.ReadLine()
+			if eR == io.EOF {
+				break
+			}
+			readedCount++
+			readedTotal++
+
+			lineString := string(lineBytes)
+			dnsRecordList := strings.Split(lineString, "\t")
+			dnsRecordV4Geo := dnsRecordList[constants.GeoV4GIndex]			// v4地理
+
+			// 属于分析的国家
+			if _, ok := ctyMap[dnsRecordV4Geo]; ok {
+				dnsRecordIPv6List := strings.Split(strings.TrimRight(dnsRecordList[constants.GeoIPv6Index], ";"), ";")
+
+				// 输出记录
+				_, err = ctyRecordWritter[dnsRecordV4Geo].WriteString(lineString + "\n")
+				if err != nil {
+					util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+					os.Exit(1)
+				}
+				ctyRecordWritter[dnsRecordV4Geo].Flush()
+
+				// 输出IPv6地址
+				for _, dnsRecordIPv6 := range dnsRecordIPv6List {
+					if _, ok := ctyUniqIPv6Map[dnsRecordV4Geo][dnsRecordIPv6]; !ok {
+
+						// 输出记录
+						_, err = ctyUniqIPv6Writter[dnsRecordV4Geo].WriteString(dnsRecordIPv6 + "\n")
+						if err != nil {
+							util.LogRecord(fmt.Sprintf("Error: %s", err.Error()))
+							os.Exit(1)
+						}
+						ctyUniqIPv6Writter[dnsRecordV4Geo].Flush()
+
+						ctyUniqIPv6Map[dnsRecordV4Geo][dnsRecordIPv6] = ""
+					}
+				}
+			}
+		}
+		util.LogRecord(fmt.Sprintf("temp-%s: readedtotal: %d, remind: %d files, cost: %ds", ym, readedTotal, ymLen - index - 1, time.Now().Sub(timeNow) / time.Second))
+	}
+
+	fmt.Println(ctyUniqIPv6Map)
+
+	util.LogRecord("Ending: " + recordFolder + "&" + countrys + " -> " + recordFolder + "/temp-" + dateSpec + "/" + countrys)
 }

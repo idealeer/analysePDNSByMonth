@@ -43,13 +43,13 @@ func analyseDNSRequestTimesByGeo(fileName string, resFileName string) {
 		dnsRQCByVCD[constants.V6GeoString] = cmcMap
 	}
 	// 添加总计国家
-	if dnsRQCByVCD[constants.V4GeoString][constants.TotalTimesString] == nil {
+	if dnsRQCByVCD[constants.V4GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		dnsRQCByVCD[constants.V4GeoString][constants.TotalTimesString] = mcMap
+		dnsRQCByVCD[constants.V4GeoString][constants.AllCountryString] = mcMap
 	}
-	if dnsRQCByVCD[constants.V6GeoString][constants.TotalTimesString] == nil {
+	if dnsRQCByVCD[constants.V6GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		dnsRQCByVCD[constants.V6GeoString][constants.TotalTimesString] = mcMap
+		dnsRQCByVCD[constants.V6GeoString][constants.AllCountryString] = mcMap
 	}
 	
 	// 打开dns记录文件
@@ -97,8 +97,8 @@ func analyseDNSRequestTimesByGeo(fileName string, resFileName string) {
 			}
 			dnsRQCByVCD[constants.V6GeoString][dnsRecordV6CTY][variables.DNSDateSpec] += dnsRecordTimes
 			dnsRQCByVCD[constants.V6GeoString][dnsRecordV6CTY][constants.TotalTimesString] += dnsRecordTimes
-			dnsRQCByVCD[constants.V6GeoString][constants.TotalTimesString][variables.DNSDateSpec] += dnsRecordTimes
-			dnsRQCByVCD[constants.V6GeoString][constants.TotalTimesString][constants.TotalTimesString] += dnsRecordTimes
+			dnsRQCByVCD[constants.V6GeoString][constants.AllCountryString][variables.DNSDateSpec] += dnsRecordTimes
+			dnsRQCByVCD[constants.V6GeoString][constants.AllCountryString][constants.TotalTimesString] += dnsRecordTimes
 		}
 		// v4地理-国家是否存在
 		if dnsRecordV4CTY != "null" {
@@ -108,8 +108,8 @@ func analyseDNSRequestTimesByGeo(fileName string, resFileName string) {
 			}
 			dnsRQCByVCD[constants.V4GeoString][dnsRecordV4CTY][variables.DNSDateSpec] += dnsRecordTimes
 			dnsRQCByVCD[constants.V4GeoString][dnsRecordV4CTY][constants.TotalTimesString] += dnsRecordTimes
-			dnsRQCByVCD[constants.V4GeoString][constants.TotalTimesString][variables.DNSDateSpec] += dnsRecordTimes
-			dnsRQCByVCD[constants.V4GeoString][constants.TotalTimesString][constants.TotalTimesString] += dnsRecordTimes
+			dnsRQCByVCD[constants.V4GeoString][constants.AllCountryString][variables.DNSDateSpec] += dnsRecordTimes
+			dnsRQCByVCD[constants.V4GeoString][constants.AllCountryString][constants.TotalTimesString] += dnsRecordTimes
 		}
 	}
 	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
@@ -176,13 +176,13 @@ func analyseAliveDomainByGeo(fileName string, resFileName string) {
 		domainAliveByVCD[constants.V6GeoString] = cmcMap
 	}
 	// 添加总计国家
-	if domainAliveByVCD[constants.V4GeoString][constants.TotalTimesString] == nil {
+	if domainAliveByVCD[constants.V4GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		domainAliveByVCD[constants.V4GeoString][constants.TotalTimesString] = mcMap
+		domainAliveByVCD[constants.V4GeoString][constants.AllCountryString] = mcMap
 	}
-	if domainAliveByVCD[constants.V6GeoString][constants.TotalTimesString] == nil {
+	if domainAliveByVCD[constants.V6GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		domainAliveByVCD[constants.V6GeoString][constants.TotalTimesString] = mcMap
+		domainAliveByVCD[constants.V6GeoString][constants.AllCountryString] = mcMap
 	}
 	
 	// 打开文件
@@ -229,8 +229,8 @@ func analyseAliveDomainByGeo(fileName string, resFileName string) {
 			}
 			domainAliveByVCD[constants.V6GeoString][dnsRecordV6CTY][variables.DNSDateSpec]++
 			domainAliveByVCD[constants.V6GeoString][dnsRecordV6CTY][constants.TotalTimesString]++
-			domainAliveByVCD[constants.V6GeoString][constants.TotalTimesString][variables.DNSDateSpec]++
-			domainAliveByVCD[constants.V6GeoString][constants.TotalTimesString][constants.TotalTimesString]++
+			domainAliveByVCD[constants.V6GeoString][constants.AllCountryString][variables.DNSDateSpec]++
+			domainAliveByVCD[constants.V6GeoString][constants.AllCountryString][constants.TotalTimesString]++
 		}
 		// v4地理-国家是否存在
 		if dnsRecordV4CTY != "null" {
@@ -240,8 +240,8 @@ func analyseAliveDomainByGeo(fileName string, resFileName string) {
 			}
 			domainAliveByVCD[constants.V4GeoString][dnsRecordV4CTY][variables.DNSDateSpec]++
 			domainAliveByVCD[constants.V4GeoString][dnsRecordV4CTY][constants.TotalTimesString]++
-			domainAliveByVCD[constants.V4GeoString][constants.TotalTimesString][variables.DNSDateSpec]++
-			domainAliveByVCD[constants.V4GeoString][constants.TotalTimesString][constants.TotalTimesString]++
+			domainAliveByVCD[constants.V4GeoString][constants.AllCountryString][variables.DNSDateSpec]++
+			domainAliveByVCD[constants.V4GeoString][constants.AllCountryString][constants.TotalTimesString]++
 		}
 	}
 	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
@@ -308,13 +308,13 @@ func analyseAliveIPv6ByGeo(fileName string, resFileName string) {
 		ipv6AliveByVCD[constants.V6GeoString] = cmcMap
 	}
 	// 添加总计国家
-	if ipv6AliveByVCD[constants.V4GeoString][constants.TotalTimesString] == nil {
+	if ipv6AliveByVCD[constants.V4GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		ipv6AliveByVCD[constants.V4GeoString][constants.TotalTimesString] = mcMap
+		ipv6AliveByVCD[constants.V4GeoString][constants.AllCountryString] = mcMap
 	}
-	if ipv6AliveByVCD[constants.V6GeoString][constants.TotalTimesString] == nil {
+	if ipv6AliveByVCD[constants.V6GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		ipv6AliveByVCD[constants.V6GeoString][constants.TotalTimesString] = mcMap
+		ipv6AliveByVCD[constants.V6GeoString][constants.AllCountryString] = mcMap
 	}
 
 	// 打开文件
@@ -361,8 +361,8 @@ func analyseAliveIPv6ByGeo(fileName string, resFileName string) {
 			}
 			ipv6AliveByVCD[constants.V6GeoString][dnsRecordV6CTY][variables.DNSDateSpec]++
 			ipv6AliveByVCD[constants.V6GeoString][dnsRecordV6CTY][constants.TotalTimesString]++
-			ipv6AliveByVCD[constants.V6GeoString][constants.TotalTimesString][variables.DNSDateSpec]++
-			ipv6AliveByVCD[constants.V6GeoString][constants.TotalTimesString][constants.TotalTimesString]++
+			ipv6AliveByVCD[constants.V6GeoString][constants.AllCountryString][variables.DNSDateSpec]++
+			ipv6AliveByVCD[constants.V6GeoString][constants.AllCountryString][constants.TotalTimesString]++
 		}
 		// v4地理-国家是否存在
 		if dnsRecordV4CTY != "null" {
@@ -372,8 +372,8 @@ func analyseAliveIPv6ByGeo(fileName string, resFileName string) {
 			}
 			ipv6AliveByVCD[constants.V4GeoString][dnsRecordV4CTY][variables.DNSDateSpec]++
 			ipv6AliveByVCD[constants.V4GeoString][dnsRecordV4CTY][constants.TotalTimesString]++
-			ipv6AliveByVCD[constants.V4GeoString][constants.TotalTimesString][variables.DNSDateSpec]++
-			ipv6AliveByVCD[constants.V4GeoString][constants.TotalTimesString][constants.TotalTimesString]++
+			ipv6AliveByVCD[constants.V4GeoString][constants.AllCountryString][variables.DNSDateSpec]++
+			ipv6AliveByVCD[constants.V4GeoString][constants.AllCountryString][constants.TotalTimesString]++
 		}
 	}
 	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
@@ -439,13 +439,13 @@ func analyseAliveSLDByGeo(v6UniqSLD string, v4UniqSLD string, resFileName string
 		sldAliveByVCD[constants.V6GeoString] = cmcMap
 	}
 	// 添加总计国家
-	if sldAliveByVCD[constants.V4GeoString][constants.TotalTimesString] == nil {
+	if sldAliveByVCD[constants.V4GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		sldAliveByVCD[constants.V4GeoString][constants.TotalTimesString] = mcMap
+		sldAliveByVCD[constants.V4GeoString][constants.AllCountryString] = mcMap
 	}
-	if sldAliveByVCD[constants.V6GeoString][constants.TotalTimesString] == nil {
+	if sldAliveByVCD[constants.V6GeoString][constants.AllCountryString] == nil {
 		mcMap := make(types.TPMSI64)
-		sldAliveByVCD[constants.V6GeoString][constants.TotalTimesString] = mcMap
+		sldAliveByVCD[constants.V6GeoString][constants.AllCountryString] = mcMap
 	}
 
 	// v6地理
@@ -493,8 +493,8 @@ func analyseAliveSLDByGeo(v6UniqSLD string, v4UniqSLD string, resFileName string
 				}
 				sldAliveByVCD[constants.V6GeoString][dnsRecordV6CTY][variables.DNSDateSpec]++
 				sldAliveByVCD[constants.V6GeoString][dnsRecordV6CTY][constants.TotalTimesString]++
-				sldAliveByVCD[constants.V6GeoString][constants.TotalTimesString][variables.DNSDateSpec]++
-				sldAliveByVCD[constants.V6GeoString][constants.TotalTimesString][constants.TotalTimesString]++
+				sldAliveByVCD[constants.V6GeoString][constants.AllCountryString][variables.DNSDateSpec]++
+				sldAliveByVCD[constants.V6GeoString][constants.AllCountryString][constants.TotalTimesString]++
 			}
 		}
 		srcFile.Close()
@@ -547,8 +547,8 @@ func analyseAliveSLDByGeo(v6UniqSLD string, v4UniqSLD string, resFileName string
 				}
 				sldAliveByVCD[constants.V4GeoString][dnsRecordV4CTY][variables.DNSDateSpec]++
 				sldAliveByVCD[constants.V4GeoString][dnsRecordV4CTY][constants.TotalTimesString]++
-				sldAliveByVCD[constants.V4GeoString][constants.TotalTimesString][variables.DNSDateSpec]++
-				sldAliveByVCD[constants.V4GeoString][constants.TotalTimesString][constants.TotalTimesString]++
+				sldAliveByVCD[constants.V4GeoString][constants.AllCountryString][variables.DNSDateSpec]++
+				sldAliveByVCD[constants.V4GeoString][constants.AllCountryString][constants.TotalTimesString]++
 			}
 		}
 		util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
@@ -766,12 +766,12 @@ func analyseSLDRequestTimesByGeo(v6UniqSLD string, v4UniqSLD string, resFileName
 				dnsRecordV6SLD := dnsRecordList[constants.V6GeoUSSLDIndex]
 				sldTimesByVCD[constants.V6GeoString][dnsRecordV6CTY][dnsRecordV6SLD] += dnsRecordV6Count
 				sldTimesByVCD[constants.V6GeoString][dnsRecordV6CTY][constants.TotalTimesString] += dnsRecordV6Count
-				if sldTimesByVCD[constants.V6GeoString][constants.TotalTimesString] == nil {
+				if sldTimesByVCD[constants.V6GeoString][constants.AllCountryString] == nil {
 					tempMap := make(types.TPMSI64)
-					sldTimesByVCD[constants.V6GeoString][constants.TotalTimesString] = tempMap
+					sldTimesByVCD[constants.V6GeoString][constants.AllCountryString] = tempMap
 				}
-				sldTimesByVCD[constants.V6GeoString][constants.TotalTimesString][dnsRecordV6SLD] += dnsRecordV6Count
-				sldTimesByVCD[constants.V6GeoString][constants.TotalTimesString][constants.TotalTimesString] += dnsRecordV6Count
+				sldTimesByVCD[constants.V6GeoString][constants.AllCountryString][dnsRecordV6SLD] += dnsRecordV6Count
+				sldTimesByVCD[constants.V6GeoString][constants.AllCountryString][constants.TotalTimesString] += dnsRecordV6Count
 			}
 		}
 		srcFile.Close()
@@ -854,12 +854,12 @@ func analyseSLDRequestTimesByGeo(v6UniqSLD string, v4UniqSLD string, resFileName
 				dnsRecordV4SLD := dnsRecordList[constants.V4GeoUSSLDIndex]
 				sldTimesByVCD[constants.V4GeoString][dnsRecordV4CTY][dnsRecordV4SLD] += dnsRecordV4Count
 				sldTimesByVCD[constants.V4GeoString][dnsRecordV4CTY][constants.TotalTimesString] += dnsRecordV4Count
-				if sldTimesByVCD[constants.V4GeoString][constants.TotalTimesString] == nil {
+				if sldTimesByVCD[constants.V4GeoString][constants.AllCountryString] == nil {
 					tempMap := make(types.TPMSI64)
-					sldTimesByVCD[constants.V4GeoString][constants.TotalTimesString] = tempMap
+					sldTimesByVCD[constants.V4GeoString][constants.AllCountryString] = tempMap
 				}
-				sldTimesByVCD[constants.V4GeoString][constants.TotalTimesString][dnsRecordV4SLD] += dnsRecordV4Count
-				sldTimesByVCD[constants.V4GeoString][constants.TotalTimesString][constants.TotalTimesString] += dnsRecordV4Count
+				sldTimesByVCD[constants.V4GeoString][constants.AllCountryString][dnsRecordV4SLD] += dnsRecordV4Count
+				sldTimesByVCD[constants.V4GeoString][constants.AllCountryString][constants.TotalTimesString] += dnsRecordV4Count
 			}
 		}
 
