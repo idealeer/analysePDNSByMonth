@@ -436,13 +436,32 @@ func GetIPsGeoByMM(ips string, ipDir string) {
 	if ips != "" {
 		getGeo(ips)
 	} else {
-		util.LogRecord("什么也没做\tPlease add the correct [-i parm]")
+		util.LogRecord("什么也没做\tPlease add the correct [-ips parm]")
 	}
 	if ipDir != "" {
 		variables.IPGeoName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPGeoName, constants.DateFormat)), constants.IPGeoExtion)
 		getGeoByFile(ipDir, variables.IPGeoName)
 	} else {
-		util.LogRecord("什么也没做\tPlease add the correct [-id parm]")
+		util.LogRecord("什么也没做\tPlease add the correct [-ip-file parm]")
+	}
+}
+//
+
+////
+/*
+	根据MaxMind数据库查询IP-ASN
+*/
+func GetIPsASNByMM(ips string, ipDir string) {
+	if ips != "" {
+		getASN(ips)
+	} else {
+		util.LogRecord("什么也没做\tPlease add the correct [-ips parm]")
+	}
+	if ipDir != "" {
+		variables.IPASNName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPASNName, constants.DateFormat)), constants.IPASNExtion)
+		getASNByFile(ipDir, variables.IPASNName)
+	} else {
+		util.LogRecord("什么也没做\tPlease add the correct [-ip-file parm]")
 	}
 }
 //

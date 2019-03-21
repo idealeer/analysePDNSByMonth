@@ -239,7 +239,7 @@ func main() {
 		analyse.GetIPsGeoByMM(ips, ipFile)
 	case constants.CmdMMASNDB:
 		analyse.PrepareMaxMindASN(mmdbASN)
-		//analyse.GetIPsGeoByMM(ips, ipFile)
+		analyse.GetIPsASNByMM(ips, ipFile)
 	case constants.CmdUnionFile:
 		analyse.UnionFiles(destyDir)
 	case constants.CmdNS:

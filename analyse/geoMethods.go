@@ -288,7 +288,7 @@ func getGeoByFile(ipFileName string, ipGeoFileName string) {
 	// 打开文件
 	dnsFile, eOOO := os.Open(ipFileName)
 	if eOOO != nil {
-		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-id parm]", eOOO.Error()))
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ip-file parm]", eOOO.Error()))
 		os.Exit(1)
 	}
 	defer dnsFile.Close() // 该函数执行完毕退出前才会执行defer后的语句

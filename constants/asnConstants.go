@@ -11,3 +11,7 @@ package constants
 const ASNCountFN	string = "asnCount"
 
 const ASNFileExtion	string = "txt"
+
+const ASNHI4CountFN	string = "asnHurriInlandV4"
+
+const ASNNHurricane	uint = 6939
