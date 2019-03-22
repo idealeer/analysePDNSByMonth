@@ -24,6 +24,7 @@ var (
 	function   		int    	// 功能
 	mmdb       		string 	// mmdb数据库
 	mmdbASN       	string 	// mmdbASN数据库
+	mmdbCity		string  // mmdnCity数据库
 	date       		string 	// 指定日期月份
 	dateBefore		string	// 先前日期月份
 	dateEnd			string	// 截止日期月份
@@ -59,6 +60,9 @@ func init() {
 	flag.IntVar(&excute, "excute", int(constants.CmdDefault),
 		fmt.Sprintf("%d\t%s\n", constants.CmdAnalyse, "统计PDNS数据，进行新的分析前请自行处理临时数据，以防临时数据错误")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdMMDB, "查询MaxMind数据库地理信息")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdMMASNDB, "查询MaxMind数据ASN信息")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdMMCity, "查询MaxMind数据库城市信息")+
+			fmt.Sprintf("%d\t%s\n", constants.CmdMMLonLa, "查询MaxMind数据库经纬度信息")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdUnionFile, "合并指定目录下的文件")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdNS, "查询IPv4地址")+
 			fmt.Sprintf("%d\t%s\n", constants.CmdTest, "测试")+
@@ -97,7 +101,8 @@ func init() {
 			fmt.Sprintf("%d\t%s\n", constants.CCmdGetInlandShow, "统计PDNS数据:获得国内态势\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdGetCtyRecordIP, "统计PDNS数据:获得指定国家全部记录\t(须指定:-excute [0])")+
 			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaASNDis, "统计PDNS数据:获得ASN分布\t(须指定:-excute [0])")+
-			fmt.Sprintf("%d\t%s\n", constants.CCMdAnaNmapPort, "统计PDNS数据:获得ASN分布\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCMdAnaNmapPort, "统计PDNS数据:分析Nmap扫描结果\t(须指定:-excute [0])")+
+			fmt.Sprintf("%d\t%s\n", constants.CCmdAnaIPv6LonLa, "统计PDNS数据:分析IPv6地址经纬度\t(须指定:-excute [0])")+
 
 			fmt.Sprintf("%d\t%s", constants.CCmdDefault, "什么也没做(默认)"))
 
@@ -106,6 +111,9 @@ func init() {
 
 	flag.StringVar(&mmdbASN, "mmdb-asn", "",
 		fmt.Sprintf("%s", "mmdbASN数据库路径"))
+
+	flag.StringVar(&mmdbCity, "mmdb-city", "",
+		fmt.Sprintf("%s", "mmdbCity数据库路径"))
 
 	flag.StringVar(&date, "date", constants.DateExample,
 		fmt.Sprintf("%s", "指定日期月份"))
@@ -229,6 +237,8 @@ func main() {
 		analyse.PrepareTopN(topN)
 		analyse.PrepareSpecCty(date, dateBefore, ctyList)
 		analyse.PrepareASNCty(date, dateBefore, ctyList)
+		analyse.PrepareMaxMindCity(mmdbCity)
+
 
 		analyse.Analyse(ccmd)
 		if ccmd == constants.CCmdAll || (ccmd >= constants.CCmdGetGeo && ccmd <= constants.CCmdAnaSLDTimesByGeo) {
@@ -240,6 +250,12 @@ func main() {
 	case constants.CmdMMASNDB:
 		analyse.PrepareMaxMindASN(mmdbASN)
 		analyse.GetIPsASNByMM(ips, ipFile)
+	case constants.CmdMMCity:
+		analyse.PrepareMaxMindCity(mmdbCity)
+		analyse.GetIPsCityByMM(ips, ipFile)
+	case constants.CmdMMLonLa:
+		analyse.PrepareMaxMindCity(mmdbCity)
+		analyse.GetIPsLonLaByMM(ips, ipFile)
 	case constants.CmdUnionFile:
 		analyse.UnionFiles(destyDir)
 	case constants.CmdNS:
@@ -278,6 +294,11 @@ func main() {
 			analyse.PrepareMaxMind(mmdb)
 			analyse.PrepareZDNS(zdns, threads)
 			analyse.PrepareTopN(topN)
+
+			analyse.PrepareSpecCty(date, dateBefore, ctyList)
+			analyse.PrepareASNCty(date, dateBefore, ctyList)
+			analyse.PrepareMaxMindCity(mmdbCity)
+
 			analyse.Analyse(ccmd)
 
 			dateBefore = ym

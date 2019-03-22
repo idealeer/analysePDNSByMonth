@@ -275,5 +275,7 @@ func Test201811China(fileName string) {
 }
 
 func main() {
+	m := make(map[string]string)
+	fmt.Println(m["1"] == "")
 	fmt.Println(strings.HasSuffix("www.edu.cnn", "edu.cn"))
 }

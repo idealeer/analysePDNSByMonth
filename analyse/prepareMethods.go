@@ -381,6 +381,32 @@ func PrepareMaxMindASN(fileName string) {
 }
 
 /*
+	MaxMindCity数据库准备
+ */
+func PrepareMaxMindCity(fileName string) {
+	fg, err := os.Stat(fileName)
+	if err != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\nPlease add the correct [-mmdb-city parm](mmdb file)", err.Error()))
+		os.Exit(1)
+	}
+	if fg.IsDir() {
+		util.LogRecord(fmt.Sprintf("Error: Please add the correct [-mmdb-city parm](mmdb file)"))
+		os.Exit(1)
+	}
+
+	variables.MaxMindCityDBName = fileName
+
+	// 打开maxminddbASN数据库
+	geoDB, eO := geoip2.Open(variables.MaxMindCityDBName)
+	if eO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eO.Error()))
+		os.Exit(1)
+	}
+	variables.MaxMindCityReader = geoDB
+}
+
+
+/*
 	日期月份准备
  */
 func PrepareDate(date string, dateBefore string, dateEnd string) {

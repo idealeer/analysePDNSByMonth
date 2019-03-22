@@ -24,3 +24,11 @@ const (
 
 const ASNNullNumber		uint = 0
 const ASNNullString		string = "null"
+
+const ASNCityNullNum	uint = 0
+const ASNCityNullString string = "null"
+
+const LonNullNum  	float64 = 555		// 经度0
+const LaNullNum		float64 = 555		// 纬度0
+
+const GeoCNString		string = "CN"

@@ -9,6 +9,7 @@
 package util
 
 import (
+	"analysePDNSByMonth/constants"
 	"analysePDNSByMonth/types"
 	"analysePDNSByMonth/variables"
 	"bytes"
@@ -158,4 +159,17 @@ func ZDNSLookUp(exe string, argu []string) string {
 		os.Exit(1)
 	}
 	return ZDNSALookUpJson2String(opBytes)
+}
+
+/*
+	判断是否有效IPv6地址
+ */
+func IsNotSigIPv6(ipv6 string) bool {
+	if strings.HasPrefix(ipv6, constants.IPv6AllAddrStr) {
+		return true
+	}
+	if strings.HasPrefix(ipv6, constants.IPv6LocalAddrStr) {
+		return true
+	}
+	return false
 }

@@ -16,3 +16,6 @@ const NoIPv6Geo bool = false
 const ResolvFile string = "/etc/resolv.conf"
 
 const ZDNSALookUp	string = "ALOOKUP"
+
+const IPv6AllAddrStr	string = "::"
+const IPv6LocalAddrStr	string = "fe80::"

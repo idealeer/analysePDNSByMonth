@@ -909,14 +909,14 @@ func uniqueSLDByGeo(fileName string, v6UniqSLDFile string, v4UniqSLDFile string)
 			resStr.Reset()
 
 			dnsRecordCount, _ := strconv.ParseInt(dnsRecordList[constants.GeoCountIndex], 10, 64)   // 次数
-			dnsRecordV6Cty := dnsRecordList[constants.GeoV4GIndex]
+			dnsRecordV4Cty := dnsRecordList[constants.GeoV4GIndex]
 
 			// 国家是否存在
-			if sldMap[dnsRecordV6Cty] == nil {
+			if sldMap[dnsRecordV4Cty] == nil {
 				sMap := make(types.TPMSI64)
-				sldMap[dnsRecordV6Cty] = sMap
+				sldMap[dnsRecordV4Cty] = sMap
 			}
-			sldMap[dnsRecordV6Cty][dnsRecordSLD] += dnsRecordCount
+			sldMap[dnsRecordV4Cty][dnsRecordSLD] += dnsRecordCount
 
 		}
 		util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))

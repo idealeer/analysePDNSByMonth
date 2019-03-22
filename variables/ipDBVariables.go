@@ -15,3 +15,6 @@ var MaxMindReader	*geoip2.Reader	// MaxMindGeo数据库读取器
 
 var MaxMindASNDBName	string			// MaxMindASN数据库名称
 var MaxMindASNReader	*geoip2.Reader	// MaxMindASN数据库读取器
+
+var MaxMindCityDBName	string			// MaxMindCity数据库名称
+var MaxMindCityReader	*geoip2.Reader	// MaxMindCity数据库读取器

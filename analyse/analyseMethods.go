@@ -40,6 +40,8 @@ func Analyse(ccmd uint8) {
 		getSpecCountryASNAndGeo()
 	case ccmd == constants.CCMdAnaNmapPort:
 		extractNmapPortResult()
+	case ccmd == constants.CCmdAnaIPv6LonLa:
+		GetIPv6LonLa()
 	default:
 		util.LogRecord("什么也没做\tPlease add the correct [-function parm]")
 	}
@@ -460,6 +462,44 @@ func GetIPsASNByMM(ips string, ipDir string) {
 	if ipDir != "" {
 		variables.IPASNName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPASNName, constants.DateFormat)), constants.IPASNExtion)
 		getASNByFile(ipDir, variables.IPASNName)
+	} else {
+		util.LogRecord("什么也没做\tPlease add the correct [-ip-file parm]")
+	}
+}
+//
+
+////
+/*
+	根据MaxMind数据库查询IP-City
+*/
+func GetIPsCityByMM(ips string, ipDir string) {
+	if ips != "" {
+		getCity(ips)
+	} else {
+		util.LogRecord("什么也没做\tPlease add the correct [-ips parm]")
+	}
+	if ipDir != "" {
+		variables.IPCityName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPCityName, constants.DateFormat)), constants.IPCityExtion)
+		getCityByFile(ipDir, variables.IPCityName)
+	} else {
+		util.LogRecord("什么也没做\tPlease add the correct [-ip-file parm]")
+	}
+}
+//
+
+////
+/*
+	根据MaxMind数据库查询IP-经纬度
+*/
+func GetIPsLonLaByMM(ips string, ipDir string) {
+	if ips != "" {
+		getLonLa(ips)
+	} else {
+		util.LogRecord("什么也没做\tPlease add the correct [-ips parm]")
+	}
+	if ipDir != "" {
+		variables.IPLonLaName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPLLName, constants.DateFormat)), constants.IPLLExtion)
+		getLonLaByFile(ipDir, variables.IPLonLaName)
 	} else {
 		util.LogRecord("什么也没做\tPlease add the correct [-ip-file parm]")
 	}

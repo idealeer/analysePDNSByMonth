@@ -145,7 +145,7 @@ func GetISOCNMap(fileName string) {
 }
 
 /*
-	根据MaxMind数据库获得IP地理信息，返回示例：中国大陆;China;CN;00001
+	根据MaxMind数据库获得IP-ASN
  */
 func GetIPASNByMM(ip string, mmdb *geoip2.Reader) (uint, string) {
 	ipIP := net.ParseIP(ip)
@@ -154,4 +154,28 @@ func GetIPASNByMM(ip string, mmdb *geoip2.Reader) (uint, string) {
 		return constants.ASNNullNumber, constants.ASNNullString
 	}
 	return record.AutonomousSystemNumber, record.AutonomousSystemOrganization
+}
+
+/*
+	根据MaxMind数据库获得IP-ASN
+ */
+func GetIPCityByMM(ip string, mmdb *geoip2.Reader) (uint, string) {
+	ipIP := net.ParseIP(ip)
+	record, err := mmdb.City(ipIP)
+	if err != nil || record.City.GeoNameID == 0 {
+		return constants.ASNCityNullNum, constants.ASNCityNullString
+	}
+	return record.City.GeoNameID, record.City.Names["en"]
+}
+
+/*
+	根据MaxMind数据库获得IP-ASN
+ */
+func GetIPLonLaByMM(ip string, mmdb *geoip2.Reader) (string, float64, float64) {
+	ipIP := net.ParseIP(ip)
+	record, err := mmdb.City(ipIP)
+	if err != nil {
+		return constants.ASNCityNullString, constants.LonNullNum, constants.LaNullNum
+	}
+	return record.Country.Names["en"], record.Location.Longitude, record.Location.Latitude
 }

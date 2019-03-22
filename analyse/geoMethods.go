@@ -15,10 +15,12 @@ import (
 	"analysePDNSByMonth/variables"
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -405,3 +407,384 @@ func getGeoPercentByFile(dnsRCDFileName string) {
 	util.LogRecord(fmt.Sprintf("第一个地理在每条记录中的比例: "))
 	fmt.Println(percentFirst / percentCount)
 }
+
+/*
+	获得ipCity信息
+ */
+func getCity(ips string) {
+	ipList := strings.Split(strings.TrimRight(ips, ","), ",")
+	for _, ip := range ipList {
+		geoNum, cityStr := util.GetIPCityByMM(ip, variables.MaxMindCityReader)
+		util.LogRecord(fmt.Sprintf("%s\t%d\t%s", ip, geoNum, cityStr))
+	}
+}
+
+/*
+	获得ip文件City信息
+ */
+func getCityByFile(ipFileName string, ipCityFileName string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + ipCityFileName)
+
+	// 打开文件
+	dnsFile, eOOO := os.Open(ipFileName)
+	if eOOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ip-file parm]", eOOO.Error()))
+		os.Exit(1)
+	}
+	defer dnsFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+
+	// 创建文件
+	fw, eOO := os.OpenFile(ipCityFileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fw.Close()
+	if eOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+		os.Exit(1)
+	}
+	outDNSGeoFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
+
+	inDNSFile := bufio.NewReader(dnsFile)
+
+	var readedCount uint64 = 0
+	var readedTotal uint64 = 0
+	fileLines := util.GetLines(ipFileName)
+
+	for {
+		if readedCount%variables.LogShowBigLag == 0 {
+			readedCount = 0
+			util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+		}
+		ipBytes, _, e := inDNSFile.ReadLine()
+		if e == io.EOF {
+			break
+		}
+		readedCount++
+		readedTotal++
+		ip := string(ipBytes)
+		ip = strings.TrimRight(ip, "\n")
+		geoNum, cityStr := util.GetIPCityByMM(ip, variables.MaxMindCityReader)
+
+		dnsRecordNew := fmt.Sprintf("%s\t%d\t%s\n", ip, geoNum, cityStr)
+
+		// 保存添加IPASN信息的记录
+		_, eW := outDNSGeoFile.WriteString(dnsRecordNew)
+
+		if eW != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
+			os.Exit(1)
+		}
+		outDNSGeoFile.Flush()
+
+	}
+	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+	util.LogRecord("Ending: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + ipCityFileName)
+}
+
+/*
+	获得ip经纬度信息
+ */
+func getLonLa(ips string) {
+	ipList := strings.Split(strings.TrimRight(ips, ","), ",")
+	for _, ip := range ipList {
+		cty, lon, la := util.GetIPLonLaByMM(ip, variables.MaxMindCityReader)
+		util.LogRecord(fmt.Sprintf("%s\t%s\t%s\t%s", ip, cty, strconv.FormatFloat(lon , 'f', 11, 64), strconv.FormatFloat(la, 'f', 11, 64)))
+	}
+}
+
+/*
+	获得ip文件经纬度信息
+ */
+func getLonLaByFile(ipFileName string, ipLonLaFileName string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + ipLonLaFileName)
+
+	// 打开文件
+	dnsFile, eOOO := os.Open(ipFileName)
+	if eOOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\tPlease add the correct [-ip-file parm]", eOOO.Error()))
+		os.Exit(1)
+	}
+	defer dnsFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+
+	// 创建文件
+	fw, eOO := os.OpenFile(ipLonLaFileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fw.Close()
+	if eOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+		os.Exit(1)
+	}
+	outDNSGeoFile := bufio.NewWriter(fw) // 创建新的 Writer 对象
+
+	inDNSFile := bufio.NewReader(dnsFile)
+
+	var readedCount uint64 = 0
+	var readedTotal uint64 = 0
+	fileLines := util.GetLines(ipFileName)
+
+	for {
+		if readedCount%variables.LogShowBigLag == 0 {
+			readedCount = 0
+			util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+		}
+		ipBytes, _, e := inDNSFile.ReadLine()
+		if e == io.EOF {
+			break
+		}
+		readedCount++
+		readedTotal++
+		ip := string(ipBytes)
+		ip = strings.TrimRight(ip, "\n")
+		cty, lon, la := util.GetIPLonLaByMM(ip, variables.MaxMindCityReader)
+
+		dnsRecordNew := fmt.Sprintf("%s\t%s\t%s\t%s\n", ip, cty, strconv.FormatFloat(lon , 'f', 11, 64), strconv.FormatFloat(la, 'f', 11, 64))
+
+		// 保存添加IP经纬度信息的记录
+		_, eW := outDNSGeoFile.WriteString(dnsRecordNew)
+
+		if eW != nil {
+			util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
+			os.Exit(1)
+		}
+		outDNSGeoFile.Flush()
+
+	}
+	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+	util.LogRecord("Ending: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + ipLonLaFileName)
+}
+
+
+/*
+	获得IPv6地址的经纬度分布
+ */
+func GetIPv6LonLa() {
+	variables.IPLonLaName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPLLName, constants.DateFormat)), constants.IPLLExtion)
+	variables.IPCNLonLaName = GetResFileName(time.Now().Format(fmt.Sprintf("%s-%s", constants.IPCNLLName, constants.DateFormat)), constants.IPCNLLExtion)
+	ggetIPv6LonLa(variables.V6GeoFileName, variables.IPLonLaName, variables.IPCNLonLaName)
+}
+
+/*
+	获得IPv6地址的经纬度分布
+ */
+func ggetIPv6LonLaList(ipFileName string, llAllFileName string, llCNFileName string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + llAllFileName + " & " + llCNFileName)
+
+	// 打开文件
+	ipFile, eOOO := os.Open(ipFileName)
+	if eOOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\n", eOOO.Error()))
+		os.Exit(1)
+	}
+	defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+	inIPFile := bufio.NewReader(ipFile)
+
+
+	// 创建全体经纬度文件
+	fwAll, eOO := os.OpenFile(llAllFileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fwAll.Close()
+	if eOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+		os.Exit(1)
+	}
+	outAllFile := bufio.NewWriter(fwAll) // 创建新的 Writer 对象
+
+	// 创建国内经纬度文件
+	fwCN, eOO := os.OpenFile(llCNFileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fwCN.Close()
+	if eOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+		os.Exit(1)
+	}
+	outCNFile := bufio.NewWriter(fwCN) // 创建新的 Writer 对象
+
+	var readedCount uint64 = 0
+	var readedTotal uint64 = 0
+	fileLines := util.GetLines(ipFileName)
+
+	// 经纬度结果
+	var llAllList = make(types.LonLaList, 0)
+	var llCNList = make(types.LonLaList, 0)
+
+
+	// 遍历IPv6
+	for {
+		if readedCount%variables.LogShowBigLag == 0 {
+			readedCount = 0
+			util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+		}
+		ipCtyBytes, _, e := inIPFile.ReadLine()
+		if e == io.EOF {
+			break
+		}
+		readedCount++
+		readedTotal++
+		ipCty := string(ipCtyBytes)
+		ipCty = strings.TrimRight(ipCty, "\n")
+		ipCtyList := strings.Split(ipCty, "\t")
+		ip := ipCtyList[0]
+		cty := ipCtyList[1]
+
+		_, lon, la := util.GetIPLonLaByMM(ip, variables.MaxMindCityReader)
+
+		// 无效
+		if lon == constants.LonNullNum {
+			continue
+		}
+
+		// 所有经纬度
+		llAllList = append(llAllList, types.LonLa{lon, la})
+
+		// 中国经纬度
+		if cty == constants.GeoCNString {
+			llCNList = append(llCNList, types.LonLa{lon, la})
+		}
+
+	}
+	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+	// 保存添加IPASN信息的记录
+	util.LogRecord(fmt.Sprintf("Reserve reslut"))
+
+	// 保存所有经纬度结果到JSon
+	jsonBytes6, err6 := json.Marshal(llAllList)
+	if err6 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err6.Error()))
+		os.Exit(1)
+	}
+	_, eW := outAllFile.WriteString(string(jsonBytes6))
+	if eW != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
+		os.Exit(1)
+	}
+	outAllFile.Flush()
+
+	// 保存国内经纬度结果到JSon
+	jsonBytes6, err6 = json.Marshal(llCNList)
+	if err6 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err6.Error()))
+		os.Exit(1)
+	}
+	_, eW = outCNFile.WriteString(string(jsonBytes6))
+	if eW != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
+		os.Exit(1)
+	}
+	outCNFile.Flush()
+
+	util.LogRecord("Ending: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + llAllFileName + " & " + llCNFileName)
+}
+
+/*
+	获得IPv6地址的经纬度分布
+ */
+func ggetIPv6LonLa(ipFileName string, llAllFileName string, llCNFileName string) {
+	timeNow := time.Now()
+	util.LogRecord("Excuting: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + llAllFileName + " & " + llCNFileName)
+
+	// 打开文件
+	ipFile, eOOO := os.Open(ipFileName)
+	if eOOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s\n", eOOO.Error()))
+		os.Exit(1)
+	}
+	defer ipFile.Close() // 该函数执行完毕退出前才会执行defer后的语句
+	inIPFile := bufio.NewReader(ipFile)
+
+
+	// 创建全体经纬度文件
+	fwAll, eOO := os.OpenFile(llAllFileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fwAll.Close()
+	if eOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+		os.Exit(1)
+	}
+	outAllFile := bufio.NewWriter(fwAll) // 创建新的 Writer 对象
+
+	// 创建国内经纬度文件
+	fwCN, eOO := os.OpenFile(llCNFileName, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
+	defer fwCN.Close()
+	if eOO != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eOO.Error()))
+		os.Exit(1)
+	}
+	outCNFile := bufio.NewWriter(fwCN) // 创建新的 Writer 对象
+
+	var readedCount uint64 = 0
+	var readedTotal uint64 = 0
+	fileLines := util.GetLines(ipFileName)
+
+	// 经纬度结果
+	var llAllList = make(types.LonLaSimList, 0)
+	var llCNList = make(types.LonLaSimList, 0)
+
+
+	// 遍历IPv6
+	for {
+		if readedCount%variables.LogShowBigLag == 0 {
+			readedCount = 0
+			util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+		}
+		ipCtyBytes, _, e := inIPFile.ReadLine()
+		if e == io.EOF {
+			break
+		}
+		readedCount++
+		readedTotal++
+		ipCty := string(ipCtyBytes)
+		ipCty = strings.TrimRight(ipCty, "\n")
+		ipCtyList := strings.Split(ipCty, "\t")
+		ip := ipCtyList[0]
+		cty := ipCtyList[1]
+
+		_, lon, la := util.GetIPLonLaByMM(ip, variables.MaxMindCityReader)
+
+		// 无效
+		if lon == constants.LonNullNum {
+			continue
+		}
+
+		// 所有经纬度
+		llAllList = append(llAllList, types.LonLaSim{lon, la})
+
+		// 中国经纬度
+		if cty == constants.GeoCNString {
+			llCNList = append(llCNList, types.LonLaSim{lon, la})
+		}
+
+	}
+	util.LogRecord(fmt.Sprintf("remaining: %d, cost: %ds", fileLines-readedTotal, time.Now().Sub(timeNow)/time.Second))
+
+	// 保存添加IPASN信息的记录
+	util.LogRecord(fmt.Sprintf("Reserve reslut"))
+
+	// 保存所有经纬度结果到JSon
+	jsonBytes6, err6 := json.Marshal(llAllList)
+	if err6 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err6.Error()))
+		os.Exit(1)
+	}
+	_, eW := outAllFile.WriteString(string(jsonBytes6))
+	if eW != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
+		os.Exit(1)
+	}
+	outAllFile.Flush()
+
+	// 保存国内经纬度结果到JSon
+	jsonBytes6, err6 = json.Marshal(llCNList)
+	if err6 != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", err6.Error()))
+		os.Exit(1)
+	}
+	_, eW = outCNFile.WriteString(string(jsonBytes6))
+	if eW != nil {
+		util.LogRecord(fmt.Sprintf("Error: %s", eW.Error()))
+		os.Exit(1)
+	}
+	outCNFile.Flush()
+
+	util.LogRecord("Ending: " + ipFileName + " & " + variables.MaxMindCityDBName + " -> " + llAllFileName + " & " + llCNFileName)
+}
+

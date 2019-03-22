@@ -16,12 +16,21 @@ const (
 	NmapSigPortIndex
 )
 
+// ip位置
+const (
+	NmapHostIndex			= iota
+	NmapIPIndex
+)
+
+// 端口位置
 const (
 	NmapPortIndex			= iota
 	NmapStatisIndex
 	NmapTDIndex
 	NmapAppIndex
 )
+
+const NmapIPGap			string = " "
 
 const NmapPortGap			string = ", "
 const NmapPSGap				string = "/"
@@ -31,5 +40,14 @@ const NmapIPv4File			string = "ipv4Nmap"
 
 const NmapIPv6PortFile		string = "ipv6Port"
 const NmapIPv4PortFile		string = "ipv4Port"
+const NmapHttpOpenFile		string = "httpOpenIpv6"
 
 const NmapFileExtion		string = "txt"
+
+const NmapHttpPort			string = "80"
+
+// Nmap扫描结果
+const (
+	NmapResOpen				string = "open"
+	NmapStatisOpenNoSig		string = "open-notSig"	// 开放但无效
+)

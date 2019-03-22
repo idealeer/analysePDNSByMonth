@@ -58,6 +58,11 @@ var DNSFileResDir				string				// 结果文件夹
 //// 结果文件
 var IPGeoName					string				// ip地理文件
 var IPASNName					string				// ipASN文件
+var IPCityName					string				// ipCity文件
+var IPLonLaName					string				// ip经纬度文件
+var IPCNLonLaName				string				// ipCN经纬度文件
+
+
 var DomainIpDetlName			string				// 域名IP详细文件
 var DomainIpName				string				// 域名IP文件
 var UnionFileName				string				// 合并文件名称

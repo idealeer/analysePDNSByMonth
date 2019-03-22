@@ -15,3 +15,7 @@ const ASNFileExtion	string = "txt"
 const ASNHI4CountFN	string = "asnHurriInlandV4"
 
 const ASNNHurricane	uint = 6939
+
+const ASCFI4CountFN	string = "asnCloudflareInlandV4"
+
+const ASNNCloudflare uint = 13335

@@ -140,6 +140,18 @@ const IPGeoExtion				string = "ig" 									// IP地理文件扩展名
 const IPASNName 				string = "IPASN"            	   				// IPASN文件
 const IPASNExtion				string = "txt" 									// IPASN文件扩展名
 
+// IPCity结果文件
+const IPCityName 				string = "IPCity"            	   				// IPCity文件
+const IPCityExtion				string = "txt" 									// IPCity文件扩展名
+
+// IP经纬度结果文件
+const IPLLName 					string = "IPv6LonLa"            	   			// IP经纬度文件
+const IPLLExtion				string = "txt" 									// IP经纬度文件扩展名
+
+// IP经纬度结果文件
+const IPCNLLName 				string = "IPv6CNLonLa"            	   			// IP经纬度文件
+const IPCNLLExtion				string = "txt" 									// IP经纬度文件扩展名
+
 
 // 合并文件结果文件
 const UnionFileName				string = "UnionFile"							// 合并文件名称
@@ -189,6 +201,10 @@ const (
 
 	CmdMMASNDB																	// ASN查询
 
+	CmdMMCity																	// city统计
+	CmdMMLonLa																	// 经纬度统计
+
+
 	CmdDefault
 )
 //
@@ -229,6 +245,8 @@ const (
 	CCmdAnaASNDis			// 分析ASN、域名地理分布
 
 	CCMdAnaNmapPort			// 分析Nmap扫描结果中的端口
+
+	CCmdAnaIPv6LonLa		// 分析IPv6地址经纬度
 
 	CCmdDefault
 )

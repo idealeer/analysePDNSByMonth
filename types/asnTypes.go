@@ -9,7 +9,8 @@
 package types
 
 type ASNC struct {
-	ASN   			string							`json:"asn,omitempty"`
+	ASNNum			uint							`json:"asnNum,omitempty"`
+	ASNName   		string							`json:"asnName,omitempty"`
 	Count 			int64							`json:"count,omitempty"`
 }
 
@@ -18,3 +19,10 @@ type ASNCList []ASNC
 func (p ASNCList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p ASNCList) Len() int           { return len(p) }
 func (p ASNCList) Less(i, j int) bool { return p[i].Count < p[j].Count }
+
+type ASNT struct {
+	ASNName			string
+	Count			int64
+}
+
+type ASNTMap map[uint]ASNT		// map

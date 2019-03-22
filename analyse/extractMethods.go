@@ -227,6 +227,10 @@ func ggetSpecCountryRecordAndUniqIPv6(countrys string, recordFolder string, date
 
 				// 输出IPv6地址
 				for _, dnsRecordIPv6 := range dnsRecordIPv6List {
+					// 不属于有效IPv6地址
+					if util.IsNotSigIPv6(dnsRecordIPv6) {
+						continue
+					}
 					if _, ok := ctyUniqIPv6Map[dnsRecordV4Geo][dnsRecordIPv6]; !ok {
 
 						// 输出记录

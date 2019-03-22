@@ -35,16 +35,19 @@ func getSpecCountryASNAndGeo(){
  */
 func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec string) {
 	timeNow := time.Now()
-	util.LogRecord("Excuting: " + recordFolder + "&" + countrys + " -> " + recordFolder + "result-" + dateSpec + "/" + countrys + "/" + constants.ASNCountFN + " & " + constants.DISFNString + " & " + constants.ASNHI4CountFN)
+	util.LogRecord("Excuting: " + recordFolder + "&" + countrys + " -> " + recordFolder + "result-" + dateSpec + "/" + countrys + "/" + constants.ASNCountFN + " & " + constants.DISFNString + " & " + constants.ASCFI4CountFN)
 
 	// 创建文件夹准备
 	for _, cty := range strings.Split(countrys, ",") {
 
 		var uniqDomainMap = make(types.TPMSS)    		// 去重域名字典
+		var uniqDomainDisMap = make(types.TPMSS)    	// 去重域名字典
 		var uniqDomainHurriMap = make(types.TPMSS)    	// 使用飓风的去重域名字典
-		var asnCountMap = make(types.TPMSI64)    		// asnMap
+
 		var disCountMap = make(types.TPMSI64)    		// 域名国内外分布
-		var asnHI4CountMap = make(types.TPMSI64) 		// 使用飓风v6地址的国内域名IPv4-ASN分布
+
+		var asnCountMap = make(types.ASNTMap)    		// asnMap
+		var asnHI4CountMap = make(types.ASNTMap) 		// 使用飓风v6地址的国内域名IPv4-ASN分布
 
 		var asnWritter *bufio.Writer					// asnWritter
 		var disWritter *bufio.Writer					// 域名国内外分布Writter
@@ -73,8 +76,8 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 		}
 		disWritter = bufio.NewWriter(fw2) // 创建新的 Writer 对象
 
-		// 创建ASN-飓风-国内v4写出变量
-		asnHI4FN := ctyFolder + constants.ASNHI4CountFN + "." + constants.ASNFileExtion
+		// 创建ASN-Cloudflare-国内v4写出变量
+		asnHI4FN := ctyFolder + constants.ASCFI4CountFN + "." + constants.ASNFileExtion
 		fw3, err3 := os.OpenFile(asnHI4FN, os.O_RDWR|os.O_CREATE, 0755) // 打开或创建文件
 		defer fw3.Close()
 		if err3 != nil {
@@ -112,31 +115,43 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 			dnsRecordList := strings.Split(lineString, "\t")
 			dnsRecordDomain := dnsRecordList[constants.GeoDomainIndex]
 			dnsRecordV6Geo := dnsRecordList[constants.GeoV6GIndex] // v6地理
+			dnsRecordIPv6 := strings.Split(strings.TrimRight(dnsRecordList[constants.GeoIPv6Index], ";"), ";")[0]
+
+			// 不属于有效IPv6地址
+			if util.IsNotSigIPv6(dnsRecordIPv6) {
+				continue
+			}
+
+			goto this
 
 			// 域名国内外分布统计
-			disCountMap[constants.TotalTimesString] ++
-			// 国内域名
-			if dnsRecordV6Geo == cty {
-				// 高校域名
-				if strings.HasSuffix(dnsRecordDomain, constants.DISEDUCN) {
-					disCountMap[constants.DISCollegeInland] ++
-				} else { // 非高校域名
-					disCountMap[constants.DISNotCollegeInland] ++
-				}
-			} else { // 国外域名
-				// 高校域名
-				if strings.HasSuffix(dnsRecordDomain, constants.DISEDUCN) {
-					disCountMap[constants.DISCollegeForeign] ++
-				} else { // 非高校域名
-					disCountMap[constants.DISNotCollegeForeign] ++
+			if _, ok := uniqDomainDisMap[dnsRecordDomain]; !ok {
+				uniqDomainDisMap[dnsRecordDomain] = ""
+				disCountMap[constants.TotalTimesString] ++
+				// 国内域名
+				if dnsRecordV6Geo == cty {
+					// 高校域名
+					if strings.HasSuffix(dnsRecordDomain, constants.DISEDUCN) {
+						disCountMap[constants.DISCollegeInland] ++
+					} else { // 非高校域名
+						disCountMap[constants.DISNotCollegeInland] ++
+					}
+				} else { // 国外域名
+					// 高校域名
+					if strings.HasSuffix(dnsRecordDomain, constants.DISEDUCN) {
+						disCountMap[constants.DISCollegeForeign] ++
+					} else { // 非高校域名
+						disCountMap[constants.DISNotCollegeForeign] ++
+					}
 				}
 			}
+
+			this:
 
 			// 域名对应ASN统计、飓风统计
 			if !strings.HasSuffix(dnsRecordDomain, constants.DISEDUCN) {
 				if _, ok := uniqDomainMap[dnsRecordDomain]; !ok {
 					uniqDomainMap[dnsRecordDomain] = ""
-					dnsRecordIPv6 := strings.Split(strings.TrimRight(dnsRecordList[constants.GeoIPv6Index], ";"), ";")[0]
 
 					// 获得ASN
 					asnNum, asnString := util.GetIPASNByMM(dnsRecordIPv6, variables.MaxMindASNReader)
@@ -147,12 +162,13 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 					}
 
 					// 次数加一
-					asnCountMap[asnString] ++
-					asnCountMap[constants.TotalTimesString] ++
+					tmpASN := types.ASNT{asnString, asnCountMap[asnNum].Count + 1}
+					asnCountMap[asnNum] = tmpASN
+					tmpASN1 := types.ASNT{constants.TotalTimesString, asnCountMap[constants.ASNNullNumber].Count + 1}
+					asnCountMap[constants.ASNNullNumber] = tmpASN1
 
 					// 国外飓风厂商
-					fmt.Println(asnNum)
-					if asnNum == constants.ASNNHurricane {
+					if asnNum == constants.ASNNCloudflare {
 						if _, ok := uniqDomainHurriMap[dnsRecordDomain]; !ok{
 							uniqDomainHurriMap[dnsRecordDomain] = ""
 							dnsRecordIPv4 := strings.Split(strings.TrimRight(dnsRecordList[constants.GeoIPv4Index], ";"), ";")[0]
@@ -165,8 +181,10 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 							}
 
 							// 次数加一
-							asnHI4CountMap[asnString] ++
-							asnHI4CountMap[constants.TotalTimesString] ++
+							tmpASN := types.ASNT{asnString, asnHI4CountMap[asnNum].Count + 1}
+							asnHI4CountMap[asnNum] = tmpASN
+							tmpASN1 := types.ASNT{constants.TotalTimesString, asnHI4CountMap[constants.ASNNullNumber].Count + 1}
+							asnHI4CountMap[constants.ASNNullNumber] = tmpASN1
 						}
 					}
 				}
@@ -177,7 +195,7 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 		// 保存ASN结果
 		asnList := make(types.ASNCList, 0)
 		for asn, c := range asnCountMap {
-			asnList = append(asnList, types.ASNC{asn, c})
+			asnList = append(asnList, types.ASNC{asn, c.ASNName, c.Count})
 		}
 		// 降序排序
 		sort.Sort(sort.Reverse(asnList))
@@ -193,7 +211,7 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 		// 保存ASN-Hurricane结果
 		asnHI4List := make(types.ASNCList, 0)
 		for asn, c := range asnHI4CountMap {
-			asnHI4List = append(asnHI4List, types.ASNC{asn, c})
+			asnHI4List = append(asnHI4List, types.ASNC{asn, c.ASNName, c.Count})
 		}
 		// 降序排序
 		sort.Sort(sort.Reverse(asnHI4List))
@@ -223,9 +241,8 @@ func ggetSpecCountryASNAndGeo(countrys string, recordFolder string, dateSpec str
 		disWritter.Flush()
 	}
 
-	util.LogRecord("Ending: " + recordFolder + "&" + countrys + " -> " + recordFolder + "temp-" + dateSpec + "/" + countrys + "/" + constants.ASNCountFN + " & " + constants.DISFNString + " & " + constants.ASNHI4CountFN)
+	util.LogRecord("Ending: " + recordFolder + "&" + countrys + " -> " + recordFolder + "temp-" + dateSpec + "/" + countrys + "/" + constants.ASNCountFN + " & " + constants.DISFNString + " & " + constants.ASCFI4CountFN)
 }
-
 
 /*
 	获得ipASN信息
@@ -299,4 +316,3 @@ func getASNByFile(ipFileName string, ipASNFileName string) {
 
 	util.LogRecord("Ending: " + ipFileName + " & " + variables.MaxMindASNDBName + " -> " + ipASNFileName)
 }
-
